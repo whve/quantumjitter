@@ -1,0 +1,17 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+/public/
+/resources/
+.DS_Store
+*.DS_Store
+Thumbs.db
+.hugo_build.lock
+*.mmdb
+*.dbf
+*.prj
+*.shp
+*.shx
+*.csv
+*.zip

@@ -1,0 +1,152 @@
+baseURL: https://quantumjitter.com/
+theme: hugo-apero
+languageCode: en
+title: Quantum Jitter
+author: Carl Goodwin
+copyright: '&copy; 2022 Carl Goodwin'
+googleAnalytics: ''
+disqusShortname: ''
+metaDataFormat: yaml
+footnoteReturnLinkContents: '&#8617;'
+paginate: 5
+preserveTaxonomyNames: yes
+ignoreFiles:
+  - \.Rmd$
+  - \.Rmarkdown$
+  - _cache$
+  - \.knit\.md$
+  - \.utf8\.md$
+enableEmoji: yes
+markup:
+  defaultMarkdownHandler: goldmark
+  goldmark:
+    renderer:
+      hardwraps: no
+      unsafe: yes
+  highlight:
+    style: github
+  tableOfContents:
+    endLevel: 2
+    ordered: no
+    startLevel: 2
+params:
+  custom_theme: 
+  customheadingFontFamily: Metropolis
+  customtextFontFamily: Bitter
+  description: A modern, beautiful, and easily configurable blog theme for Hugo.
+  favicon: /img/favicon.ico
+  headingFontFamily: sans-serif
+  logo: /img/logo.PNG
+  mainSections:
+    - blog
+    - project
+    - talk
+  math:
+    renderer: katex
+  navallcaps: yes
+  orgLocal: Anywhere
+  orgName: RStudio
+  sharing_image: /img/papillons.jpg
+  social:
+    - icon: github
+      icon_pack: fab
+      url: https://github.com/cgoo4/blog
+    - icon: linkedin-in
+      icon_pack: fab
+      url: https://www.linkedin.com/in/thinkr/
+    - icon: envelope
+      icon_pack: fas
+      url: /contact/
+    # - icon: facebook-square
+    #   icon_pack: fab
+    #   url: https://www.facebook.com/hashtag/ap%C3%A9ro
+    # - icon: instagram
+    #   icon_pack: fab
+    #   url: https://www.instagram.com/explore/tags/apero/
+    # - icon: twitter
+    #   icon_pack: fab
+    #   url: https://twitter.com/hashtag/apéro
+    # - icon: impactstory
+    #   icon_pack: ai
+    #   url: https://impactstory.org/u/0000-0002-8082-1890
+    # - icon: orcid
+    #   icon_pack: ai
+    #   url: http://orcid.org/0000-0002-8082-1890
+    - icon: rss
+      icon_pack: fas
+      url: /categories/r/index.xml
+  socialInFooter: yes
+  socialInHeader: no
+  textFontFamily: sans-serif
+  theme: poppy
+  twitter: apreshill
+  utterances:
+    issue_term: pathname
+    label: 'comments :crystal_ball:'
+    repo_name: apreshill/apero
+    theme: boxy-light
+    use_utterances: yes
+taxonomies:
+  category: categories
+  series: series
+  tag: tags
+menu:
+  footer:
+    - name: License
+      title: License
+      url: /license/
+      weight: 1
+    - name: Contact
+      title: Contact
+      url: /contact/
+      weight: 2
+  header:
+    - name: Projects
+      title: Projects
+      url: /project/
+      weight: 1
+    - name: Toolbox
+      title: R Toolbox
+      url: /project/box/
+      weight: 2
+    - name: Blog
+      title: Blog
+      url: /blog/
+      weight: 3
+    - name: About
+      title: About
+      url: /about/
+      weight: 4
+    # - name: Talks
+    #   title: Talks
+    #   url: /talk/
+    #   weight: 4
+    # - name: A collection
+    #   title: A collection
+    #   url: /collection/
+    #   weight: 5
+    # - name: Elements
+    #   title: Element Page
+    #   url: /elements/
+    #   weight: 6
+privacy:
+  disqus:
+    disable: no
+  googleAnalytics:
+    anonymizeIP: yes
+    disable: no
+    respectDoNotTrack: yes
+  instagram:
+    disable: no
+    simple: yes
+  twitter:
+    disable: no
+    enableDNT: yes
+    simple: no
+  vimeo:
+    disable: no
+    enableDNT: yes
+    simple: yes
+  youtube:
+    disable: no
+    privacyEnhanced: yes

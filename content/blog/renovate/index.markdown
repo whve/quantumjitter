@@ -1,0 +1,39 @@
+---
+title: A Fresh Lick of Paint
+author: Carl Goodwin
+date: '2022-03-31'
+slug: renovate
+categories:
+  - R
+tags:
+  - web site
+summary: A couple of years ago I [moved house](/blog/plunge) from Wordpress to [Blogdown](https://bookdown.org/yihui/blogdown/). It's a less stressful life and I plan to stay. [Hugo Academic](https://academic-demo.netlify.app) served me well, but sometimes you just need a fresh coat of paint.
+lastmod: '2022-04-05'
+draft: false
+featured: false
+---
+
+![](/blog/renovate/featured.GIF)
+
+A couple of years ago I [moved house](/blog/plunge) from Wordpress to [Blogdown](https://bookdown.org/yihui/blogdown/). It's proved to be a much less stressful life and I plan to stay. [Hugo Academic](https://academic-demo.netlify.app) served me well, but sometimes you just need a fresh coat of paint. I liked the look of [Hugo Apéro](https://hugo-apero-docs.netlify.app).
+
+Apéro feels simpler and has an elegant design with well-chosen themes and fonts.
+
+I like to add my own digital art to both the site and Rmarkdown projects and Apéro gives me more flexibility here.  It naturally accommodates GIF animations, for example, on my [home page](/.) and in my project and [blog](/blog/) lists. 
+
+Apero does not yet have a naturally built-in dark mode option. It's not the most important feature for me and may be tricky to accommodate when, for example, the home-page image incorporates transparency.
+
+A tag cloud would also be a nice-to-have.
+
+The upgrade approach I took was to create a brand new blogdown project in RStudio with the Apero theme and then copy over and re-knit my projects one by one.
+
+Initially a few things did not render correctly, e.g. syntax highlighting, which I later found required my renaming the index.Rmd files to index.Rmarkdown. 
+
+In Hugo Academic, each project's (or post's) feature image rendered automatically in both the project list page and in the individual project. In Apero, I needed to add `![](pathname)` to the Rmarkdown file to render the image in the project or post. I actually prefer this approach because it means the image then also appears when re-publishing, e.g. to R-bloggers.
+
+And with Academic my RSS feed was /category/r and whilst most of my URLs remained unchanged in the move to Apéro, the feed is now /categories/r, so I followed the [redirect advice](https://yihui.org/en/2017/11/301-redirect/) of the author of Blogdown.
+
+I'm also taking the opportunity to switch commenting from Disqus to utterance.es. The latter is a much more elegant fit with the design and there are a number of posts on some of the issues with Disqus. 
+
+As is sometimes the case, wanting to do something triggers the need to do a bunch of other things. I had not previously been using Github for my blog, but rather dragged the public folder direct to Netlify. Utterances requires a public Github repo and there is [guidance available when deploying an existing project to Github](https://happygitwithr.com/existing-github-first.html) rather than following the normal Github-first practice.
+

@@ -37,7 +37,7 @@ Once the manual deployment to Netlify was working, I then moved on to continuous
 
 And because I wanted to deploy a *pre-existing* RStudio project to Github, rather than following the usual Github-first practice, I found this [guidance](https://happygitwithr.com/existing-github-first.html) helpful.
 
-The Netlify deployment via Github initially also failed with a "Base directory does not exist" message. The fix there was to leave the Base directory in Netlify's Build settings blank rather than using the repo URL (which it already had under Current repository).
+The Netlify deployment via Github initially also failed with a "Base directory does not exist" message. The fix there was to leave the Base directory in Netlify's build settings blank rather than using the repo URL (which it already had under current repository).
 
 ![](/blog/renovate/netlify.png)
 

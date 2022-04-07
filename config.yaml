@@ -69,9 +69,9 @@ params:
     # - icon: impactstory
     #   icon_pack: ai
     #   url: https://impactstory.org/u/0000-0002-8082-1890
-    # - icon: orcid
-    #   icon_pack: ai
-    #   url: http://orcid.org/0000-0002-8082-1890
+    - icon: acclaim
+      icon_pack: ai
+      url: https://www.credly.com/users/carl-goodwin/badges#
     - icon: rss
       icon_pack: fas
       url: /categories/r/index.xml

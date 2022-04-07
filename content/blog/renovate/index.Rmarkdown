@@ -27,17 +27,17 @@ The upgrade approach I took was to create a brand new blogdown project in RStudi
 
 Running `blogdown::check_site()` is highly worthwhile and runs a number of checks to ensure you're good-to-go.
 
-I focused first on manual deployment, i.e. dragging the Public folder to Netlify, rather than going straight to continuous deployment via Github. Doing it this way would narrow the potential cause of any problems when doing the latter. I also deployed to one of Netlify's auto-generated site names, so my live Academic blog remained unaffected.
+I focused first on manual deployment, i.e. dragging the Public folder to Netlify, rather than going straight to continuous deployment via Github. Doing it this way would narrow the potential cause of any problems when doing the latter. I also deployed to one of Netlify's auto-generated site names, so my live manually-deployed Academic blog remained unaffected.
 
 In Hugo Academic, each project's (or post's) feature image rendered automatically in both the project list page and in the individual project. In Apéro, I needed to add `![](pathname)` to the Rmarkdown file to render the image in an individual project or post. I actually prefer this approach because it means the image then also appears when re-publishing to a blog aggregator.
 
 Initially a few things did not render correctly, e.g. syntax highlighting, which it turned out required renaming the `index.Rmd` files to `index.Rmarkdown`. And when the manual deployment to Netlify got stuck uploading, I realised I also needed to change the `.Rprofile` to `blogdown.method = 'markdown'` rather than `blogdown.method = 'html'`.
 
-Once the manual deployment to Netlify was working, I then moved on to continuous deployment via Github. Part of the motivation for this was so I could switch the commenting engine from Disqus to [utterance.es](https://utteranc.es). The latter is a more elegant fit with the Apéro design and has some nice advantages. 
+Once the manual deployment to Netlify was working, I then moved on to continuous deployment via Github. Part of the motivation for this was so I could switch the commenting engine from Disqus to [utterance.es](https://utteranc.es). [Installing](https://github.com/apps/utterances) the latter provides a more elegant fit with the Apéro design and has some nice advantages. 
 
 And because I wanted to deploy a *pre-existing* RStudio project to Github, rather than following the usual Github-first practice, I found this [guidance](https://happygitwithr.com/existing-github-first.html) helpful.
 
-The Netlify deployment via Github initially also failed with a "Base directory does not exist" message. The fix there was to leave the Base directory in Netlify's Build settings blank rather than using the repo URL (which it already had under Current repository).
+The Netlify deployment via Github initially also failed with a "Base directory does not exist" message. The fix there was to leave the Base directory in Netlify's build settings blank rather than using the repo URL (which it already had under current repository).
 
 ![](/blog/renovate/netlify.png)
 

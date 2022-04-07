@@ -1,4 +1,4 @@
-baseURL: https://playful-fox-e0e979.com/
+baseURL: https://jolly-madeleine-95873e.netlify.app/
 theme: hugo-apero
 languageCode: en
 title: Quantum Jitter
@@ -50,7 +50,7 @@ params:
   social:
     - icon: github
       icon_pack: fab
-      url: https://github.com/cgoo4/blog
+      url: https://github.com/cgoo4/quantumjitter
     - icon: linkedin-in
       icon_pack: fab
       url: https://www.linkedin.com/in/thinkr/
@@ -82,8 +82,8 @@ params:
   twitter: apreshill
   utterances:
     issue_term: pathname
-    label: 'comments :crystal_ball:'
-    repo_name: apreshill/apero
+    label: 'utterance'
+    repo_name: cgoo4/quantumjitter
     theme: boxy-light
     use_utterances: yes
 taxonomies:

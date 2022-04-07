@@ -1,2 +1,2 @@
-/category  /categories
-/tag   /tags
+/category/*  /categories/:splat
+/tag/*   /tags/:splat

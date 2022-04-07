@@ -1,7 +1,7 @@
 ---
 title: A Fresh Lick of Paint
 author: Carl Goodwin
-date: '2022-04-10'
+date: '2022-04-07'
 slug: renovate
 categories:
   - R

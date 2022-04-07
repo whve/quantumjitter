@@ -1,7 +1,7 @@
 ---
 title: A Fresh Lick of Paint
 author: Carl Goodwin
-date: '2022-03-31'
+date: '2022-04-10'
 slug: renovate
 categories:
   - R
@@ -21,19 +21,32 @@ Apéro feels simpler and has an elegant design with well-chosen themes and fonts
 
 I like to add my own digital art to both the site and Rmarkdown projects and Apéro gives me more flexibility here.  It naturally accommodates GIF animations, for example, on my [home page](/.) and in my project and [blog](/blog/) lists. 
 
-Apero does not yet have a naturally built-in dark mode option. It's not the most important feature for me and may be tricky to accommodate when, for example, the home-page image incorporates transparency.
+Apéro does not yet have a naturally built-in dark mode option, nor a tag cloud; features I used in Academic. But these are not super important for me.
 
-A tag cloud would also be a nice-to-have.
+The upgrade approach I took was to create a brand new blogdown project in RStudio with the Apéro theme and then copy over and re-knit my projects one by one. This worked well because every project needed at least one change as a direct consequence of the move and re-opening each project also prompted other beneficial updates. I left my original Hugo Academic RStudio project untouched so I could easily revert to it.
 
-The upgrade approach I took was to create a brand new blogdown project in RStudio with the Apero theme and then copy over and re-knit my projects one by one.
+Running `blogdown::check_site()` is highly worthwhile and runs a number of checks to ensure you're good-to-go.
 
-Initially a few things did not render correctly, e.g. syntax highlighting, which I later found required my renaming the index.Rmd files to index.Rmarkdown. 
+I focused first on manual deployment, i.e. dragging the Public folder to Netlify, rather than going straight to continuous deployment via Github. Doing it this way would narrow the potential cause of any problems when doing the latter. I also deployed to one of Netlify's auto-generated site names, so my live Academic blog remained unaffected.
 
-In Hugo Academic, each project's (or post's) feature image rendered automatically in both the project list page and in the individual project. In Apero, I needed to add `![](pathname)` to the Rmarkdown file to render the image in the project or post. I actually prefer this approach because it means the image then also appears when re-publishing, e.g. to R-bloggers.
+In Hugo Academic, each project's (or post's) feature image rendered automatically in both the project list page and in the individual project. In Apéro, I needed to add `![](pathname)` to the Rmarkdown file to render the image in an individual project or post. I actually prefer this approach because it means the image then also appears when re-publishing to a blog aggregator.
 
-And with Academic my RSS feed was /category/r and whilst most of my URLs remained unchanged in the move to Apéro, the feed is now /categories/r, so I followed the [redirect advice](https://yihui.org/en/2017/11/301-redirect/) of the author of Blogdown.
+Initially a few things did not render correctly, e.g. syntax highlighting, which it turned out required renaming the `index.Rmd` files to `index.Rmarkdown`. And when the manual deployment to Netlify got stuck uploading, I realised I also needed to change the `.Rprofile` to `blogdown.method = 'markdown'` rather than `blogdown.method = 'html'`.
 
-I'm also taking the opportunity to switch commenting from Disqus to utterance.es. The latter is a much more elegant fit with the design and there are a number of posts on some of the issues with Disqus. 
+Once the manual deployment to Netlify was working, I then moved on to continuous deployment via Github. Part of the motivation for this was so I could switch the commenting engine from Disqus to [utterance.es](https://utteranc.es). The latter is a more elegant fit with the Apéro design and has some nice advantages. 
 
-As is sometimes the case, wanting to do something triggers the need to do a bunch of other things. I had not previously been using Github for my blog, but rather dragged the public folder direct to Netlify. Utterances requires a public Github repo and there is [guidance available when deploying an existing project to Github](https://happygitwithr.com/existing-github-first.html) rather than following the normal Github-first practice.
+And because I wanted to deploy a *pre-existing* RStudio project to Github, rather than following the usual Github-first practice, I found this [guidance](https://happygitwithr.com/existing-github-first.html) helpful.
+
+The Netlify deployment via Github initially also failed with a "Base directory does not exist" message. The fix there was to leave the Base directory in Netlify's Build settings blank rather than using the repo URL (which it already had under Current repository).
+
+![](/blog/renovate/netlify.png)
+
+One more thing I needed to do was set up this `static/_redirects` file. In this way, bookmarks for, say, `category/r` or `tag/statistical-inference` (following the taxonomy for Academic) would go to `categories/r` or `tags/statistical-inference`.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+cat(readLines("/Users/carl/R Projects/quantumjitter/static/_redirects"), sep = '\n')
+```
+
+Then finally I could pack away my paint pots, paint roller and step ladder, put my feet up and enjoy my newly-renovated blogdown home.
 

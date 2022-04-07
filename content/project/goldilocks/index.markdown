@@ -9,7 +9,7 @@ tags:
   - quant
   - statistics
 summary: The [Goldilocks principle](https://en.wikipedia.org/wiki/Goldilocks_principle) has its origins in a story about a girl who tastes bowls of porridge left by three bears. When investing in stocks, how many might be 'just right'?
-lastmod: '2022-04-03'
+lastmod: '2022-04-06'
 draft: false
 featured: false
 ---
@@ -115,11 +115,15 @@ mean_returns <- portfolios %>%
 portfolios %>%
   ggplot(aes(portfolio_size, portfolio_return, group = portfolio_size)) +
   geom_violin(aes(fill = portfolio_size), show.legend = FALSE) +
-  geom_label(aes(portfolio_size, 1.5, label = percent(mean_return, accuracy = 1)),
-    data = mean_returns, fill = cols[4],
+  geom_label(aes(portfolio_size, 1.5,
+    label = percent(mean_return, accuracy = 1)
+  ),
+  data = mean_returns, fill = cols[4],
   ) +
-  geom_label(aes(portfolio_size, -0.2, label = percent(min_return, accuracy = 1)),
-    data = mean_returns, fill = cols[1],
+  geom_label(aes(portfolio_size, -0.2,
+    label = percent(min_return, accuracy = 1)
+  ),
+  data = mean_returns, fill = cols[1],
   ) +
   scale_y_continuous(labels = percent_format(), breaks = breaks_extended(9)) +
   scale_fill_manual(values = cols[c(1:5)]) +

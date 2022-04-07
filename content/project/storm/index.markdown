@@ -8,7 +8,7 @@ categories:
 tags:
   - quant
 summary: Covid-19 began battering the financial markets in February. Which sectors are faring best when comparing each in the S&P 500 with the overall market since February 19th, 2020.
-lastmod: '2022-04-03'
+lastmod: '2022-04-06'
 draft: false
 featured: false
 ---
@@ -17,7 +17,7 @@ featured: false
 
 
 
-![](/project/storm/featured.jpeg)
+![](/project/storm/featured.GIF)
 
 Covid-19 began battering the financial markets in 2020 Which sectors are faring best?
 

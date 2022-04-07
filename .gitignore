@@ -3,6 +3,12 @@
 .RData
 .Ruserdata
 *.Rmarkdown
+*.csv
+*.dbf
+*.prj
+*.shp
+*.shx
+*.zip
 /public/
 /resources/
 .DS_Store

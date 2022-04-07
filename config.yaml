@@ -33,7 +33,7 @@ params:
   custom_theme: 
   customheadingFontFamily: Metropolis
   customtextFontFamily: Bitter
-  description: A modern, beautiful, and easily configurable blog theme for Hugo.
+  description: A blogdown-powered and Hugo Apero themed Data Science & Machine Learning blog.
   favicon: /img/favicon.ico
   headingFontFamily: sans-serif
   logo: /img/logo.PNG

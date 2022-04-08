@@ -63,6 +63,8 @@ And because I wanted to deploy a *pre-existing* RStudio project to Github, rathe
 
 I played around a bit with the `.gitignore` file and found I could exclude quite a lot of stuff that Netlify would not need to do the Hugo build.
 
+Regarding API keys, I had previously used a hidden code-chunk in Rmarkdown. It felt like time to be a little more rigorous and use the [keyring package](https://github.com/r-lib/keyring) for storing these.
+
 The Netlify deployment via Github did initially fail with a "Base directory does not exist" message. The fix there was to leave the base directory in Netlify's build settings blank rather than using the repo URL (which it already had under current repository).
 
 

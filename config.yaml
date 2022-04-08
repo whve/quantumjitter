@@ -8,7 +8,7 @@ googleAnalytics: ''
 disqusShortname: ''
 metaDataFormat: yaml
 footnoteReturnLinkContents: '&#8617;'
-paginate: 5
+paginate: 30
 preserveTaxonomyNames: yes
 ignoreFiles:
   - \.Rmd$
@@ -44,8 +44,8 @@ params:
   math:
     renderer: katex
   navallcaps: yes
-  orgLocal: Anywhere
-  orgName: RStudio
+  orgLocal: London
+  orgName: Carl Goodwin
   sharing_image: /img/papillons.jpg
   social:
     - icon: github
@@ -79,7 +79,7 @@ params:
   socialInHeader: no
   textFontFamily: sans-serif
   theme: poppy
-  twitter: apreshill
+  twitter: 
   utterances:
     issue_term: pathname
     label: 'utterance'

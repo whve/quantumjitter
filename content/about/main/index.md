@@ -9,11 +9,11 @@ intro: |
   
   I live in London and post-graduated with an MBA from Hult International Business School as valedictorian in 2001.
   
-  After a long and varied career with [Big Blue](https://www.ibm.com/), mixing business leadership and data scientist roles, I'm currently taking some time out to pursue personal projects.
+  After 36 years with [Big Blue](https://www.ibm.com/), mixing business leadership and data scientist roles, I'm currently taking some time out to pursue personal projects.
   
   My passion for data science and machine learning extends beyond work, and this is hopefully reflected in this personal blog. The [tidyverse](https://www.tidyverse.org) and [tidymodels](https://www.tidymodels.org) have made data science and modelling a real joy to do. And I love using Adobe Fresco to bring it all to life.
   
-  I do have a little time for freelance standalone pieces of work in my areas of interest. And I'd also happily help with the occasional graphic in return for an attribution. So please do [get in touch](/contact/).
+  I am available for standalone freelance projects in my areas of interest. Do [get in touch](/contact/) if you feel I may be able to help, or if you simply want to message me regarding any aspect of my blog.
   
 show_outro: false
 outro: |

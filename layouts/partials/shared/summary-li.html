@@ -1,0 +1,13 @@
+<section class="featured-content">
+{{ $page := . }} <!--save current page-->
+
+{{ $number_tags := $page.Params.number_tags | default 0 }}
+{{ if ge $number_tags 1 }}
+  <article{{ if .Params.show_outro }} class="bb pb5"{{ end }}>
+  <h5 class="f4 mv4 ttu tracked lh-title bt pv3">Themes</h5>
+  {{ range first $number_tags site.Taxonomies.tags.ByCount }}
+      <a class="f6 link dim ba ph3 pv2 mb2 dib mr2" href="{{ .Page.RelPermalink }}">{{ .Page.Title }} ({{ .Count }})</a>
+  {{ end }}
+  </article>
+{{ end }}
+</section>

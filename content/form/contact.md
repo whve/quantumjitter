@@ -2,12 +2,12 @@
 date: "2019-02-25T13:38:41-06:00"
 description: Feel free to use this form to drop me a line. I would love to hear about any content you found particularly helpful, or any interest in seeking my help for a freelance project.
 draft: false
-formspree_form_id: f/xwkyrkpv
+formspree_form_id: xwkyrkpv
 layout: split-right
 name: Contact Us Form
 show_poweredby_formspree: true
 show_social_links: true
-submit_button_label: Send Message
+submit_button_label: Send
 title: Get in Touch
 type: form
 url: contact

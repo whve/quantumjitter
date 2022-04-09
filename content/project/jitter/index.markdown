@@ -7,7 +7,7 @@ categories:
   - R
 tags:
 summary: Welcome to the tidyverse with data ingestion, cleaning and tidying. And some visualisations of sales data with a little jittering.
-lastmod: '2022-04-02'
+lastmod: '2022-04-09'
 draft: false
 featured: false
 ---

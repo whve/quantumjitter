@@ -7,21 +7,16 @@ categories:
   - R
 tags:
   - web site
-subtitle: 'Leaving Wordpress for a quieter life in Blogdown'
 summary: After reading up on [Blogdown](https://bookdown.org/yihui/blogdown/), I decided to take the plunge and leave Wordpress for a quieter life in Blogdown. The motivation?
 authors: []
-lastmod: '2022-03-31'
-featured: no
-image:
-  caption: ''
-  focal_point: ''
-  preview_only: no
-projects: []
+lastmod: '2022-04-10'
+draft: false
+featured: false
 ---
 
-![](/blog/plunge/featured.GIF)
+After reading up on [Blogdown](https://bookdown.org/yihui/blogdown/), I decided to take the plunge and leave Wordpress for a quieter life in Blogdown. 
 
-After reading up on [Blogdown](https://bookdown.org/yihui/blogdown/), I decided to take the plunge and leave Wordpress for a quieter life in Blogdown. The motivation?
+![](/blog/plunge/featured.GIF)
 
 ## Motivation
 

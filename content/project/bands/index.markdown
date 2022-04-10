@@ -9,7 +9,7 @@ tags:
   - statistical inference
   - regex
 summary: Are the residential property bands of [3 decades ago](https://www.gov.uk/guidance/understand-how-council-tax-bands-are-assessed#council-tax-bands-in-england-based-on-1-april-1991-values) becoming less so? Would a sample of those recently-sold reveal band convergence? And what may be inferred about those not sampled?
-lastmod: '2022-04-03'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -20,9 +20,9 @@ featured: false
 
 
 
-![](/project/bands/featured.JPG)
-
 Are the distinct residential property bands of [3 decades ago](https://www.gov.uk/guidance/understand-how-council-tax-bands-are-assessed#council-tax-bands-in-england-based-on-1-april-1991-values) becoming less so?
+
+![](/project/bands/featured.JPG)
 
 Over the years, urban properties have been added to and divided up. And two streets of equal attractiveness, and with equivalently-banded properties, may have diverged as neighbourhoods evolved. 
 

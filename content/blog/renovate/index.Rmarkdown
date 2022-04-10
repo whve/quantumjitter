@@ -13,6 +13,8 @@ draft: false
 featured: false
 ---
 
+## Motivation
+
 A couple of years ago I [moved house](/blog/plunge) from Wordpress to [Blogdown](https://bookdown.org/yihui/blogdown/). It's proved to be a much less stressful life and I plan to stay. [Hugo Academic](https://academic-demo.netlify.app) served me well, but sometimes you just need a fresh coat of paint. I liked the look of [Hugo Apéro](https://hugo-apero-docs.netlify.app).
 
 ![](/blog/renovate/featured.GIF)

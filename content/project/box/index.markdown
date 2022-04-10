@@ -8,7 +8,7 @@ categories:
 tags:
   - web scraping
 summary: R packages & functions that make doing data science a joy. Established by aggregating actual usage across the [project portfolio](/project/) showcased in this blog.
-lastmod: '2022-04-03'
+lastmod: '2022-04-10'
 draft: false
 featured: true
 image:
@@ -20,9 +20,9 @@ image:
 
 
 
-![](/project/box/featured-1.png)
-
 Each [project](/project/) closes with a table summarising the R tools used. By visualising my most frequently used packages and functions I get a sense of where I may most benefit from going deeper and keeping abreast of the latest package versions
+
+![](/project/box/featured-1.png)
 
 I may also spot superseded functions e.g. `spread` and `gather` may now be replaced by `pivot_wider` and `pivot_longer`. Or an opportunity to switch a non-tidyverse package for a newer tidyverse (or ecosystem) alternative, e.g. for UpSetR I can now use ggupset which plays well with ggplot.
 
@@ -58,9 +58,9 @@ files <- list.files(path = "../../../public/project/",
                     pattern = "\\.html$",
                     recursive = TRUE) %>% 
   str_c(getwd() %>% dirname(), ., sep = "/") %>%
-  str_replace("apero2/content", "apero2/public") %>% 
+  str_replace("quantumjitter/content", "quantumjitter/public") %>% 
   as_tibble() %>%
-  filter(!str_detect(value, "world|dt1|appfiles|project/index")) %>%
+  filter(!str_detect(value, "world|dt1|appfiles|project/index|page/")) %>%
   pull()
 ```
 

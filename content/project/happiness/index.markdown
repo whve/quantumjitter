@@ -10,7 +10,7 @@ tags:
   - cluster analysis
   - geospatial
 summary: The Smoke, to use London's nickname, has 32 boroughs plus the central business district known as the City of London. What does Cluster Analysis tell us about the characteristics that bind them?
-lastmod: '2022-04-08'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -21,9 +21,9 @@ featured: false
 
 
 
-![](/project/happiness/featured.GIF)
-
 [The Smoke](https://www.theguardian.com/environment/2002/nov/30/uknews.pollution), to use London's nickname, has 32 boroughs plus the central business district known as the [City of London](https://en.wikipedia.org/wiki/City_of_London). What does Cluster Analysis tell us about the characteristics that bind them?
+
+![](/project/happiness/featured.GIF)
 
 
 ```r

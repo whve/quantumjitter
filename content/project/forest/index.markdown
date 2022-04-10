@@ -9,7 +9,7 @@ tags:
   - machine learning
   - statistics
 summary: Criminal goings-on in a random forest and predictions with other models from the Tidymodels framework.
-lastmod: '2022-04-03'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -18,9 +18,9 @@ featured: false
 
 
 
-![](/project/forest/featured.jpeg)
-
 When first posted in 2018 this project used the caret package to model [crime in London](https://data.gov.uk/dataset). Since then, the newer [tidymodels](https://www.tidymodels.org) framework, consistent with tidy data principles, has rapidly evolved.
+
+![](/project/forest/featured.jpeg)
 
 
 ```r

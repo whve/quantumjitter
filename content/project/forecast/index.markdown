@@ -9,7 +9,7 @@ tags:
   - time series
   - forecast
 summary: Humans have the magical ability to plan for future events. But it's not quite a uniquely human trait as ravens can match a four-year-old.
-lastmod: '2022-04-03'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -26,9 +26,9 @@ featured: false
 
 
 
-![](/project/forecast/featured.jpeg)
-
 Humans have the magical ability to plan for future events, for future gain. It’s [not quite a uniquely human trait](https://www.newscientist.com/article/2140668-ravens-can-plan-for-future-as-well-as-4-year-old-children-can/). Because apparently ravens can match a four-year-old.
+
+![](/project/forecast/featured.jpeg)
 
 An abundance of data, and some very nice R packages, make our ability to plan all the more powerful.
 

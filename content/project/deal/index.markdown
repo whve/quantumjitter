@@ -10,7 +10,7 @@ tags:
   - word embeddings
   - natural language processing
 summary: Before the post-Brexit trade negotiations concluded, what did quantitative textual analysis and word embeddings tell us about the shifting trade-talk sentiment?
-lastmod: '2022-04-04'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -27,9 +27,9 @@ featured: false
 
 
 
-![](/project/deal/featured.GIF)
-
 Reading news articles on the will-they-won't-they post-Brexit trade negotiations with the EU sees days of optimism jarred by days of gloom. Do negative news articles, when one wants a positive outcome, leave a deeper impression?
+
+![](/project/deal/featured.GIF)
 
 Is it possible to get a more objective view from [quantitative analysis of textual data](https://quanteda.io)? To do this, I'm going to look at hundreds of articles published in the Guardian newspaper over the course of the year to see how trade-talk sentiment changed week-to-week.
 
@@ -196,16 +196,16 @@ wv_main <- glove$fit_transform(trade_fcm, n_iter = 10)
 ```
 
 ```
-## INFO  [17:10:33.810] epoch 1, loss 0.3831 
-## INFO  [17:10:36.708] epoch 2, loss 0.2582 
-## INFO  [17:10:39.584] epoch 3, loss 0.2298 
-## INFO  [17:10:42.450] epoch 4, loss 0.2096 
-## INFO  [17:10:45.324] epoch 5, loss 0.1926 
-## INFO  [17:10:48.215] epoch 6, loss 0.1796 
-## INFO  [17:10:51.088] epoch 7, loss 0.1699 
-## INFO  [17:10:53.953] epoch 8, loss 0.1623 
-## INFO  [17:10:56.821] epoch 9, loss 0.1561 
-## INFO  [17:10:59.734] epoch 10, loss 0.1510
+## INFO  [21:07:50.476] epoch 1, loss 0.3795 
+## INFO  [21:07:53.681] epoch 2, loss 0.2573 
+## INFO  [21:07:57.359] epoch 3, loss 0.2301 
+## INFO  [21:08:00.872] epoch 4, loss 0.2101 
+## INFO  [21:08:04.314] epoch 5, loss 0.1929 
+## INFO  [21:08:07.258] epoch 6, loss 0.1798 
+## INFO  [21:08:10.132] epoch 7, loss 0.1700 
+## INFO  [21:08:13.021] epoch 8, loss 0.1624 
+## INFO  [21:08:15.912] epoch 9, loss 0.1563 
+## INFO  [21:08:18.898] epoch 10, loss 0.1511
 ```
 
 ```r
@@ -237,40 +237,40 @@ word_vectors %>%
    <td style="text-align:right;"> 1.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> frost </td>
-   <td style="text-align:right;"> 0.8328681 </td>
+   <td style="text-align:left;"> negotiator </td>
+   <td style="text-align:right;"> 0.8340204 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> michel </td>
-   <td style="text-align:right;"> 0.7962457 </td>
+   <td style="text-align:right;"> 0.8178380 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> negotiator </td>
-   <td style="text-align:right;"> 0.7582896 </td>
+   <td style="text-align:left;"> frost </td>
+   <td style="text-align:right;"> 0.8007849 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> brussels </td>
-   <td style="text-align:right;"> 0.7463316 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> negotiators </td>
-   <td style="text-align:right;"> 0.6837575 </td>
+   <td style="text-align:right;"> 0.7973158 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> eus </td>
-   <td style="text-align:right;"> 0.6453075 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> tweeted </td>
-   <td style="text-align:right;"> 0.6449741 </td>
+   <td style="text-align:right;"> 0.6748264 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> chief </td>
-   <td style="text-align:right;"> 0.6401695 </td>
+   <td style="text-align:right;"> 0.6449360 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> team </td>
-   <td style="text-align:right;"> 0.6245705 </td>
+   <td style="text-align:left;"> negotiators </td>
+   <td style="text-align:right;"> 0.6294027 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> talks </td>
+   <td style="text-align:right;"> 0.6263531 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> eu </td>
+   <td style="text-align:right;"> 0.6236305 </td>
   </tr>
 </tbody>
 </table>
@@ -491,7 +491,7 @@ toc()
 ```
 
 ```
-## 1.547 sec elapsed
+## 1.299 sec elapsed
 ```
 
 Plotting the changing proportion of positive sentiment over time did surprise me a little. The outcome was more balanced than I expected which perhaps confirms the deeper impression left on me by negative articles.

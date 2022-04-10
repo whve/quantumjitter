@@ -8,7 +8,7 @@ categories:
 tags:
   - statistics
 summary: "Exploring parliamentary voting patterns with hierarchical clustering"
-lastmod: '2022-04-02'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -19,9 +19,9 @@ featured: false
 
 
 
-![](/project/hansard/featured.jpeg)
-
 Before each vote, the Speaker of the House yells "Division! Clear the Lobby". I'd like to find which cluster of MPs (Members of Parliament) may be exiting the lobby and going their own way.
+
+![](/project/hansard/featured.jpeg)
 
 [Hansard](https://hansard.parliament.uk) reports what's said in the UK Parliament, sets out details of divisions, and records decisions taken during a sitting. The R package [hansard package](https://cran.r-project.org/web/packages/hansard/) provides access to the data.
 

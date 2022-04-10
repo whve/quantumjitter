@@ -9,7 +9,7 @@ tags:
   - quant
   - statistics
 summary: The [Goldilocks principle](https://en.wikipedia.org/wiki/Goldilocks_principle) has its origins in a story about a girl who tastes bowls of porridge left by three bears. When investing in stocks, how many might be 'just right'?
-lastmod: '2022-04-06'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -18,9 +18,9 @@ featured: false
 
 
 
-![](/project/goldilocks/featured.GIF)
-
 [The Goldilocks principle](https://en.wikipedia.org/wiki/Goldilocks_principle) has its origins in a children's story about a girl who tastes the bowls of porridge left by three bears. She prefers the one that is neither too hot nor too cold, but is just right.
+
+![](/project/goldilocks/featured.GIF)
 
 When it comes to investing in stocks, how many is "just right"?
 

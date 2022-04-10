@@ -10,7 +10,7 @@ tags:
   - machine learning
   - text mining
 summary: The Natural History Museum began [recording cetacean]( https://data.nhm.ac.uk/dataset/historical-uk-cetacean-strandings-dataset) strandings in 1913. For some records the species is uncertain. Could these be predicted using [tidymodels](https://www.tidymodels.org) and [textrecipes](https://textrecipes.tidymodels.org)?
-lastmod: '2022-04-03'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -27,9 +27,9 @@ featured: false
 
 
 
-![](/project/cetacea/featured.GIF)
-
 The Natural History Museum began recording cetacean (whales, dolphins and porpoises) strandings in 1913. I'd like to explore this [1913-1989 dataset]( https://data.nhm.ac.uk/dataset/historical-uk-cetacean-strandings-dataset). 
+
+![](/project/cetacea/featured.GIF)
 
 
 ```r
@@ -505,7 +505,7 @@ toc()
 ```
 
 ```
-## 444.425 sec elapsed
+## 478.447 sec elapsed
 ```
 
 ```r

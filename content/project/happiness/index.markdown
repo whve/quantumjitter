@@ -9,6 +9,7 @@ tags:
   - dimensionality reduction
   - cluster analysis
   - geospatial
+  - machine learning
 summary: The Smoke, to use London's nickname, has 32 boroughs plus the central business district known as the City of London. What does Cluster Analysis tell us about the characteristics that bind them?
 lastmod: '2022-04-10'
 draft: false

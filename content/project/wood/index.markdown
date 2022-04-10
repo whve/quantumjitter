@@ -8,7 +8,7 @@ categories:
 tags:
   - apps
 summary: There comes a point where the sheer volume of small multiples one wants to visualise requires a different strategy.
-lastmod: '2022-04-03'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -20,9 +20,9 @@ featured: false
 
 
 
-![](/project/wood/featured.jpeg)
-
 In [Criminal Goings-on](/project/forest) faceting offered a way to get a sense of the data. This is a great visualisation tool building on the principle of small multiples. There may come a point though where the sheer volume of small multiples make it harder to "see the wood for the trees". What's an alternative strategy?
+
+![](/project/wood/featured.jpeg)
 
 
 ```r

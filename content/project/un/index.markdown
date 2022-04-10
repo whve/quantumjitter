@@ -9,7 +9,7 @@ tags:
   - dimensionality reduction
   - animation
 summary: Animated dimensionality reduction and whether East and West are drifting closer or farther apart based on historical UN voting patterns.
-lastmod: '2022-04-03'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -18,9 +18,9 @@ featured: false
 
 
 
-![](/project/un/featured.GIF)
-
 In [Finding Happiness in 'The Smoke'](/project/happiness), dimensionality reduction and cluster analysis are used to see how different characteristics group London boroughs.
+
+![](/project/un/featured.GIF)
 
 Dimensionality reduction is used here to visualise the grouping of UN members, for example [five of the founding members](https://research.un.org/en/unmembers/founders), based on their [General Assembly](http://www.un.org/en/ga/) voting patterns. And by using animation, it's possible to more easily see changes over time.
 

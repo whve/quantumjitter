@@ -8,7 +8,7 @@ categories:
 tags:
   - geospatial
 summary: "A little interactive geospatial mapping and an unexpected find"
-lastmod: '2022-04-02'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -17,9 +17,9 @@ featured: false
 
 
 
-![](/project/stories/featured.jpeg)
-
 Late in 2017 I experimented with geospatial mapping techniques in R. The log file for my blog seemed like a good source of data. I thought it might appeal to a wider audience of one (including me). 
+
+![](/project/stories/featured.jpeg)
 
 Combined with longitude and latitude data from MaxMind’s GeoLite2, this offered a basis for analysis. Although less precise than the GeoIP2 database, this would be more than adequate for my purpose of getting to country and city level.  I settled on the leaflet package for visualisation given the interactivity and pleasing choice of aesthetics.
 

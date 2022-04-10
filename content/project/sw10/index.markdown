@@ -7,7 +7,7 @@ categories:
   - R
 tags:
 summary: "A series of events, such as the Financial Crisis and the 2016 Brexit vote, that damped down residential property sales in London"
-lastmod: '2022-04-06'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -18,9 +18,9 @@ featured: false
 
 
 
-![](/project/sw10/featured.JPG)
-
 Various events have impacted house sales in London. There has been a series of increases in [stamp duty](https://www.gov.uk/stamp-duty-land-tax) and the impact of the financial crisis. More recently Brexit and the consequences of Covid-19. 
+
+![](/project/sw10/featured.JPG)
 
 How is London postal area SW10 coping with all this?
 

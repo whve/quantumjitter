@@ -9,7 +9,7 @@ tags:
   - apps
   - web scraping
 summary: Every story needs a good plot. Which plot types generate the most interest on Wikipedia?
-lastmod: '2022-04-02'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -18,9 +18,9 @@ featured: false
 
 
 
-![](/project/thicken/featured.jpeg)
-
 One could think of data science as “art grounded in facts”. It tells a story through visualisation. Both story and visualisation rely on a good plot. And an abundance of those has evolved over time. Many have their own dedicated Wikipedia page!
+
+![](/project/thicken/featured.jpeg)
 
 Which generate the most interest? How is the interest in each trending over time? Let's build an interactive app to find out.
 

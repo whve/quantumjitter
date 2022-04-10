@@ -10,7 +10,7 @@ tags:
   - web scraping
   - regex
 summary: When visualising a small number of overlapping sets, [Venn diagrams](https://en.wikipedia.org/wiki/Venn_diagram) work well. But what if there are more. Here's a tidy(verse) approach to the exploration of sets and their intersections.
-lastmod: '2022-04-02'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -21,11 +21,9 @@ featured: false
 
 
 
+In [Let's Jitter](/project/jitter) I looked at a relatively simple set of sales data. [G-Cloud data](https://www.digitalmarketplace.service.gov.uk/g-cloud/search) offers a much richer source of data with many thousands of services documented by several thousand suppliers and hosted across myriad web pages. These services straddle many categories. I'll use these data to explore sets and their intersections.
+
 ![](/project/sets/featured.jpeg)
-
-In [Let's Jitter](/project/jitter) I looked at a relatively simple set of sales data. 
-
-[G-Cloud data](https://www.digitalmarketplace.service.gov.uk/g-cloud/search) offers a much richer source of data with many thousands of services documented by several thousand suppliers and hosted across myriad web pages. These services straddle many categories. I'll use these data to explore sets and their intersections.
 
 
 ```r

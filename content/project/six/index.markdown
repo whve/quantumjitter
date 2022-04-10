@@ -7,7 +7,7 @@ categories:
   - R
 tags:
 summary: Exploring colour palettes and small multiples with ggplot2.
-lastmod: '2022-04-03'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -16,9 +16,9 @@ featured: false
 
 
 
-![](/project/six/featured.JPG)
-
 In September 2017 I wrote a post entitled [Let's Jitter](/project/jitter). It looked at how the SME share of sales evolved over time. I revisited this topic here six months later, along the way adding a splash of colour and some faceted plots.
+
+![](/project/six/featured.JPG)
 
 
 ```r

@@ -10,7 +10,7 @@ tags:
   - statistics
   - apps
 summary: "Do we see more planning applications when house sales are depressed?"
-lastmod: '2022-04-02'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -23,9 +23,9 @@ featured: false
 
 
 
-![](/project/planning/featured.JPG)
-
 In [House Sales](/project/sw10) I looked at how a series of events damped down sales. By combining these sales data with planning applications I'd like to see if home owners "start digging" when they can't sell.
+
+![](/project/planning/featured.JPG)
 
 Planning data is harvested with the kind permission of The Royal Borough of Kensington and Chelsea (RBKC). The code for these code chunks is not rendered out of courtesy to RBKC.
 
@@ -289,7 +289,7 @@ toc()
 ```
 
 ```
-## 109.657 sec elapsed
+## 115.539 sec elapsed
 ```
 
 Let's now bind the data into one tibble and summarise the transaction volumes over time.

@@ -7,7 +7,7 @@ categories:
   - R
 tags:
 summary: Welcome to the tidyverse with data ingestion, cleaning and tidying. And some visualisations of sales data with a little jittering.
-lastmod: '2022-04-09'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
@@ -16,9 +16,9 @@ featured: false
 
 
 
-![](/project/jitter/featured.PNG)
-
 This first little project uses the [tidyverse](https://www.tidyverse.org) collection of packages to import, explore and visualise some sales data. The UK Government's Digital Marketplace provides a rich and varied source of public data [under the Open Government Licence](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+
+![](/project/jitter/featured.PNG)
 
 The marketplace was set up with an intent to break down barriers that impede Small and Medium Enterprises (SMEs) from bidding for Public Sector contracts. So, let's see how that's going.
 

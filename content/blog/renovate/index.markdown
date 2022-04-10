@@ -8,16 +8,14 @@ categories:
 tags:
   - web site
 summary: A couple of years ago I [moved house](/blog/plunge) from Wordpress to [Blogdown](https://bookdown.org/yihui/blogdown/). It's a less stressful life and I plan to stay. [Hugo Academic](https://academic-demo.netlify.app) served me well, but sometimes you just need a fresh coat of paint.
-lastmod: '2022-04-09'
+lastmod: '2022-04-10'
 draft: false
 featured: false
 ---
 
-![](/blog/renovate/featured.GIF)
-
-## Motivation
-
 A couple of years ago I [moved house](/blog/plunge) from Wordpress to [Blogdown](https://bookdown.org/yihui/blogdown/). It's proved to be a much less stressful life and I plan to stay. [Hugo Academic](https://academic-demo.netlify.app) served me well, but sometimes you just need a fresh coat of paint. I liked the look of [Hugo Apéro](https://hugo-apero-docs.netlify.app).
+
+![](/blog/renovate/featured.GIF)
 
 Apéro feels simpler and has an elegant design with well-chosen themes and fonts.
 

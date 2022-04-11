@@ -1,3 +1,4 @@
-/category/*  /categories/:splat
-/tag/*       /tags/:splat
-/post/*      /blog/:splat
+/category/*                         /categories/:splat
+/tag/*                              /tags/:splat
+/post/*                             /blog/:splat
+/project/goldilocks/featured.jpeg   /project/goldilocks/featured.GIF

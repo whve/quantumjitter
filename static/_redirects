@@ -1,2 +1,3 @@
 /category/*  /categories/:splat
 /tag/*       /tags/:splat
+/post/*      /blog/:splat

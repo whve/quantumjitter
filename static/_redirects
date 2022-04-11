@@ -2,3 +2,4 @@
 /tag/*                              /tags/:splat
 /post/*                             /blog/:splat
 /project/goldilocks/featured.jpeg   /project/goldilocks/featured.GIF
+/project/zbox/*                     /project/box/:splat

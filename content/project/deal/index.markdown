@@ -10,7 +10,7 @@ tags:
   - word embeddings
   - natural language processing
 summary: Before the post-Brexit trade negotiations concluded, what did quantitative textual analysis and word embeddings tell us about the shifting trade-talk sentiment?
-lastmod: '2022-04-10'
+lastmod: '2022-04-11'
 draft: false
 featured: false
 ---
@@ -38,7 +38,7 @@ Is it possible to get a more objective view from [quantitative analysis of textu
 library(tidyverse)
 library(wesanderson)
 library(kableExtra)
-library(GuardianR)
+library(guardianapi)
 library(quanteda)
 library(scales)
 library(tictoc)
@@ -48,7 +48,6 @@ library(text2vec)
 library(topicmodels)
 library(slider)
 library(glue)
-library(keyring)
 ```
 
 
@@ -136,16 +135,15 @@ Access to the Guardian's API requires a key which may be requested [here](https:
 ```r
 tic()
 
-read_slowly <- slowly(get_guardian)
+read_slowly <- slowly(gu_content)
 
 article_df <-
   dates_df %>%
   pmap_dfr(., function(start_date, end_date) {
     read_slowly(
       "brexit",
-      from.date = start_date,
-      to.date = end_date,
-      api.key = key_get("guardian_api")
+      from_date = start_date,
+      to_date = end_date
     )
   })
 
@@ -159,7 +157,7 @@ The data need a little cleaning, for example, to remove multi-topic articles, ht
 trade_df <-
   article_df %>%
   filter(!str_detect(id, "/live/"), 
-         sectionId %in% c("world", "politics", "business")) %>%
+         section_id %in% c("world", "politics", "business")) %>%
   mutate(
     body = str_remove_all(body, "<.*?>") %>% str_to_lower(),
     body = str_remove_all(body, "[^a-z0-9 .-]"),
@@ -172,7 +170,7 @@ A corpus then gives me a collection of texts whereby each document is a newspape
 
 ```r
 trade_corp <- trade_df %>% 
-  corpus(docid_field = "shortUrl", text_field = "body")
+  corpus(docid_field = "short_url", text_field = "body", unique_docnames = FALSE)
 ```
 
 Although only articles mentioning Brexit have been imported, some of these will not be related to trade negotiations with the EU. For example, there are on-going negotiations with many countries around the world. So, word embeddings will help to narrow the focus to the specific context of the UK-EU trade deal.
@@ -196,16 +194,16 @@ wv_main <- glove$fit_transform(trade_fcm, n_iter = 10)
 ```
 
 ```
-## INFO  [21:07:50.476] epoch 1, loss 0.3795 
-## INFO  [21:07:53.681] epoch 2, loss 0.2573 
-## INFO  [21:07:57.359] epoch 3, loss 0.2301 
-## INFO  [21:08:00.872] epoch 4, loss 0.2101 
-## INFO  [21:08:04.314] epoch 5, loss 0.1929 
-## INFO  [21:08:07.258] epoch 6, loss 0.1798 
-## INFO  [21:08:10.132] epoch 7, loss 0.1700 
-## INFO  [21:08:13.021] epoch 8, loss 0.1624 
-## INFO  [21:08:15.912] epoch 9, loss 0.1563 
-## INFO  [21:08:18.898] epoch 10, loss 0.1511
+## INFO  [16:41:21.663] epoch 1, loss 0.3812 
+## INFO  [16:41:24.617] epoch 2, loss 0.2574 
+## INFO  [16:41:27.701] epoch 3, loss 0.2290 
+## INFO  [16:41:30.728] epoch 4, loss 0.2090 
+## INFO  [16:41:33.760] epoch 5, loss 0.1924 
+## INFO  [16:41:36.828] epoch 6, loss 0.1795 
+## INFO  [16:41:39.856] epoch 7, loss 0.1698 
+## INFO  [16:41:42.825] epoch 8, loss 0.1622 
+## INFO  [16:41:45.883] epoch 9, loss 0.1561 
+## INFO  [16:41:48.902] epoch 10, loss 0.1510
 ```
 
 ```r
@@ -237,40 +235,40 @@ word_vectors %>%
    <td style="text-align:right;"> 1.0000000 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> negotiator </td>
-   <td style="text-align:right;"> 0.8340204 </td>
-  </tr>
-  <tr>
    <td style="text-align:left;"> michel </td>
-   <td style="text-align:right;"> 0.8178380 </td>
+   <td style="text-align:right;"> 0.8317228 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> frost </td>
-   <td style="text-align:right;"> 0.8007849 </td>
+   <td style="text-align:right;"> 0.8140611 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> negotiator </td>
+   <td style="text-align:right;"> 0.8037279 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> brussels </td>
-   <td style="text-align:right;"> 0.7973158 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> eus </td>
-   <td style="text-align:right;"> 0.6748264 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> chief </td>
-   <td style="text-align:right;"> 0.6449360 </td>
+   <td style="text-align:right;"> 0.7039215 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> negotiators </td>
-   <td style="text-align:right;"> 0.6294027 </td>
+   <td style="text-align:right;"> 0.6431384 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> talks </td>
-   <td style="text-align:right;"> 0.6263531 </td>
+   <td style="text-align:left;"> team </td>
+   <td style="text-align:right;"> 0.6392188 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> eu </td>
-   <td style="text-align:right;"> 0.6236305 </td>
+   <td style="text-align:left;"> eus </td>
+   <td style="text-align:right;"> 0.6350772 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> told </td>
+   <td style="text-align:right;"> 0.6252520 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> chief </td>
+   <td style="text-align:right;"> 0.6206945 </td>
   </tr>
 </tbody>
 </table>
@@ -287,7 +285,7 @@ context_df <-
 
 context_corp <- 
   context_df %>% 
-  corpus(docid_field = "shortUrl", text_field = "body")
+  corpus(docid_field = "short_url", text_field = "body")
 ```
 
 Quanteda's `kwic` function shows key phrases in context to ensure we're homing in on the required texts. Short URLs are included below so one can click on any to read the actual article as presented by The Guardian.
@@ -305,7 +303,7 @@ context_corp %>%
   kwic(pattern = phrase(c("trade negotiation", "trade deal", "trade talks")), 
        valuetype = "regex", window = 7) %>%
   as_tibble() %>%
-  left_join(article_df, by = c("docname" = "shortUrl")) %>% 
+  left_join(article_df, by = c("docname" = "short_url")) %>% 
   slice_sample(n = 10) %>% 
   select(docname, pre, keyword, post, headline) %>%
   kbl()
@@ -405,12 +403,11 @@ sent_df <-
   context_corp %>% 
   dfm(dictionary = data_dictionary_LSD2015) %>% 
   as_tibble() %>%
-  left_join(context_df, by = c("doc_id" = "shortUrl")) %>% 
+  left_join(context_df, by = c("doc_id" = "short_url")) %>% 
   mutate(
     pos = positive + neg_negative,
     neg = negative + neg_positive,
-    date = date_ceiling(date_parse(webPublicationDate, 
-                                   format = "%Y-%m-%d"), "week"),
+    date = date_ceiling(as.Date(web_publication_date), "week"),
     pct_pos = pos / (pos + neg)
   )
 
@@ -491,7 +488,7 @@ toc()
 ```
 
 ```
-## 1.299 sec elapsed
+## 1.169 sec elapsed
 ```
 
 Plotting the changing proportion of positive sentiment over time did surprise me a little. The outcome was more balanced than I expected which perhaps confirms the deeper impression left on me by negative articles.
@@ -505,7 +502,7 @@ The lower plot shows the volume of articles. As we draw closer to the crunch-poi
 width <- 7
 
 sent_df2 <- sent_df %>%
-  mutate(web_date = date_parse(webPublicationDate, format = "%Y-%m-%d")) %>% 
+  mutate(web_date = as.Date(web_publication_date)) %>% 
   group_by(web_date) %>%
   summarise(pct_pos = sum(pos) / sum(neg + pos)) %>% 
   mutate(
@@ -585,11 +582,11 @@ Summarising below the packages and functions used in this post enables me to sep
 <tbody>
   <tr>
    <td style="text-align:left;"> base </td>
-   <td style="text-align:left;"> c[7];  sum[3];  function[2];  mean[2];  set.seed[2];  conflicts[1];  cumsum[1];  search[1];  t[1] </td>
+   <td style="text-align:left;"> c[7];  sum[3];  as.Date[2];  function[2];  mean[2];  set.seed[2];  conflicts[1];  cumsum[1];  search[1];  t[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> clock </td>
-   <td style="text-align:left;"> date_parse[2];  add_days[1];  add_months[1];  date_build[1];  date_ceiling[1] </td>
+   <td style="text-align:left;"> add_days[1];  add_months[1];  date_build[1];  date_ceiling[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> dplyr </td>
@@ -604,16 +601,12 @@ Summarising below the packages and functions used in this post enables me to sep
    <td style="text-align:left;"> glue[1] </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> GuardianR </td>
-   <td style="text-align:left;"> get_guardian[1] </td>
+   <td style="text-align:left;"> guardianapi </td>
+   <td style="text-align:left;"> gu_content[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> kableExtra </td>
    <td style="text-align:left;"> kbl[5] </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> keyring </td>
-   <td style="text-align:left;"> key_get[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> patchwork </td>

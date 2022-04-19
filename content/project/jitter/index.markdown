@@ -7,7 +7,7 @@ categories:
   - R
 tags:
 summary: Welcome to the tidyverse with data ingestion, cleaning and tidying. And some visualisations of sales data with a little jittering.
-lastmod: '2022-04-10'
+lastmod: '2022-04-19'
 draft: false
 featured: false
 ---
@@ -37,7 +37,7 @@ library(kableExtra)
 ```r
 theme_set(theme_bw())
 
-(cols <- wes_palette(name = "Royal1", type = "discrete"))
+(cols <- wes_palette("Royal1"))
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="100%" />
@@ -55,10 +55,10 @@ url <- str_c(
 )
 
 gcloud_df <-
-  read_csv(url) %>%
-  clean_names() %>%
+  read_csv(url) |> 
+  clean_names() |> 
   mutate(
-    evidenced_spend = str_remove_all(evidenced_spend, "[^0-9-]") %>%
+    evidenced_spend = str_remove_all(evidenced_spend, "[^0-9-]") |> 
       parse_number(),
     date = as.Date(as.numeric(return_month), origin = "1899-12-30"),
     date = if_else(
@@ -75,25 +75,25 @@ Now we can summarise and visualise how the SME share has changed over time using
 
 
 ```r
-share_df <- gcloud_df %>%
-  group_by(date) %>%
+share_df <- gcloud_df |> 
+  group_by(date) |> 
   summarise(
     evidenced_spend = sum(evidenced_spend, na.rm = TRUE),
     sme_spend = sum(sme_spend, na.rm = TRUE),
     pct = sme_spend / evidenced_spend
   )
 
-last_date <- gcloud_df %>% 
-  arrange(desc(date)) %>% 
-  slice(1) %>% 
-  pull(date) %>% 
+last_date <- gcloud_df |> 
+  arrange(desc(date)) |> 
+  slice(1) |> 
+  pull(date) |> 
   date_format(format = "%B %d, %Y")
 
-share_df %>%
+share_df |> 
   ggplot(aes(date, pct)) +
   geom_point(colour = cols[4]) +
   geom_smooth(colour = cols[2], fill = cols[3]) +
-  scale_y_continuous(labels = percent_format()) +
+  scale_y_continuous(labels = label_percent()) +
   scale_x_date(date_breaks = "years", date_labels = "%Y") +
   labs(
     x = NULL, y = NULL,
@@ -111,27 +111,27 @@ Dig a little deeper, and one can also see variation by sub-sector.  And that’s
 
 
 ```r
-sector_df <- gcloud_df %>%
+sector_df <- gcloud_df |> 
   mutate(sector = if_else(
     sector %in% c("Central Government", "Local Government", "Police", "Health"),
     sector,
     "Other Sector"
-  )) %>%
-  group_by(customer_name, sector) %>%
+  )) |> 
+  group_by(customer_name, sector) |> 
   summarise(
     evidenced_spend = sum(evidenced_spend, na.rm = TRUE),
     sme_spend = sum(sme_spend, na.rm = TRUE),
     pct = sme_spend / evidenced_spend
-  ) %>% 
-  filter(evidenced_spend >= 100000) %>% 
-  group_by(sector) %>%
-  mutate(median_pct = median(pct)) %>% 
-  ungroup() %>% 
+  ) |> 
+  filter(evidenced_spend >= 100000) |>  
+  group_by(sector) |> 
+  mutate(median_pct = median(pct)) |> 
+  ungroup() |> 
   mutate(sector = fct_reorder(sector, median_pct))
 
-n_df <- sector_df %>% group_by(sector) %>% summarise(n = n())
+n_df <- sector_df |>  group_by(sector) |>  summarise(n = n())
 
-sector_df %>%
+sector_df |> 
   ggplot(aes(sector, pct)) +
   geom_boxplot(outlier.shape = FALSE, fill = cols[3]) +
   geom_jitter(width = 0.2, alpha = 0.5, colour = cols[2]) +
@@ -139,7 +139,7 @@ sector_df %>%
     data = n_df,
     fill = cols[1], colour = "white"
   ) +
-  scale_y_continuous(labels = percent_format()) +
+  scale_y_continuous(labels = label_percent()) +
   labs(
     x = NULL, y = NULL,
     title = glue("SME Share of G-Cloud to {last_date}"),
@@ -219,7 +219,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> scales </td>
-   <td style="text-align:left;"> percent_format[2] </td>
+   <td style="text-align:left;"> label_percent[2] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> stats </td>

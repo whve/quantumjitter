@@ -10,7 +10,7 @@ tags:
   - web scraping
   - regex
 summary: When visualising a small number of overlapping sets, [Venn diagrams](https://en.wikipedia.org/wiki/Venn_diagram) work well. But what if there are more. Here's a tidy(verse) approach to the exploration of sets and their intersections.
-lastmod: '2022-04-10'
+lastmod: '2022-04-20'
 draft: false
 featured: false
 ---
@@ -37,14 +37,14 @@ library(ggupset)
 library(ggVennDiagram)
 library(glue)
 
-plan(multisession, workers = 6)
+plan(multicore)
 ```
 
 
 ```r
 theme_set(theme_bw())
 
-(cols <- wes_palette(name = "Royal2", type = "continuous"))
+(cols <- wes_palette("Royal2"))
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="100%" />
@@ -66,18 +66,18 @@ lot_urls <-
   )
 
 cat_urls <- future_map_dfr(lot_urls, function(x) {
-  nodes <- x %>%
-    read_html() %>%
+  nodes <- x |>
+    read_html() |>
     html_elements(".app-lot-filter__last-list li a")
 
   tibble(
-    url = nodes %>%
+    url = nodes |>
       html_attr("href"),
 
-    pages = nodes %>%
+    pages = nodes |>
       html_text()
   )
-}) %>%
+}) |>
   mutate(
     pages = parse_number(as.character(pages)),
     pages = if_else(pages %% 30 > 0, pages %/% 30 + 1, pages %/% 30),
@@ -85,10 +85,10 @@ cat_urls <- future_map_dfr(lot_urls, function(x) {
     url = str_remove(url, ".*(?=&)")
   )
 
-version <- lot_urls[[1]] %>% 
-  read_html() %>% 
-  html_elements(".app-search-result:first-child") %>% 
-  html_text() %>% 
+version <- lot_urls[[1]] |> 
+  read_html() |> 
+  html_elements(".app-search-result:first-child") |> 
+  html_text() |> 
   str_extract("G-Cloud \\d\\d")
 ```
 
@@ -109,37 +109,42 @@ data_df <-
     ),
     function(x, y, z) {
       future_map_dfr(1:y, function(y) {
-        str_c(
+        refs <- str_c(
           "https://www.digitalmarketplace.service.gov.uk/g-cloud/search?page=",
           y,
           x,
           "&lot=cloud-",
           z
-        ) %>%
-          read_html() %>%
-          html_elements("#js-dm-live-search-results .govuk-link") %>%
-          html_attr("href") %>%
-          tibble(
+        ) |>
+          read_html() |>
+          html_elements("#js-dm-live-search-results .govuk-link") |>
+          html_attr("href") 
+        
+       tibble(
             lot = str_c("Cloud ", str_to_title(z)),
-            id = str_extract(., "[[:digit:]]{15}"),
-            cat = str_remove(x, "&serviceCategories=") %>%
-              str_replace_all("\\Q+\\E", " ") %>%
+            id = str_extract(refs, "[[:digit:]]{15}"),
+            cat = str_remove(x, "&serviceCategories=") |>
+              str_replace_all("\\Q+\\E", " ") |>
               str_remove("%28[[:print:]]+%29")
           )
       })
     }
-  ) %>%
-  select(lot:cat) %>%
+  ) |>
+  select(lot:cat) |>
   mutate(
-    cat = str_trim(cat) %>% str_to_title(),
-    abbr = str_remove(cat, "and") %>% abbreviate(3) %>% str_to_upper()
+    cat = str_trim(cat) |> str_to_title(),
+    abbr = str_remove(cat, "and") |> abbreviate(3) |> str_to_upper()
   )
 
 toc()
 ```
 
 ```
-## 2310.494 sec elapsed
+## 5007.295 sec elapsed
+```
+
+```r
+# Uncached, 78 mins with multicore
 ```
 
 Now that I have a nice tidy [tibble](https://tibble.tidyverse.org), I can start to think about visualisations.
@@ -148,17 +153,17 @@ I like Venn diagrams. But to create one I'll first need to do a little prep as `
 
 
 ```r
-host_df <- data_df %>%
-  filter(lot == "Cloud Hosting") %>%
+host_df <- data_df |>
+  filter(lot == "Cloud Hosting") |>
   group_by(abbr)
 
-keys <- host_df %>% 
-  group_keys() %>% 
+keys <- host_df |> 
+  group_keys() |> 
   pull(abbr)
 
-all_cats <- host_df %>% 
-  group_split() %>%
-  map("id") %>% 
+all_cats <- host_df |> 
+  group_split() |>
+  map("id") |> 
   set_names(keys)
 ```
 
@@ -168,9 +173,9 @@ Venn diagrams work best with a small number of sets. So we’ll select four cate
 ```r
 four_cats <- all_cats[c("CAAH", "PAAS", "OBS", "IND")]
 
-four_cats %>% 
+four_cats |> 
   ggVennDiagram(label = "count", label_alpha = 0) +
-  scale_fill_gradient(low = cols[4], high = cols[5]) +
+  scale_fill_gradient(low = cols[3], high = cols[5]) +
   scale_colour_manual(values = cols[c(rep(4, 4))]) +
   labs(
     x = "Category Combinations", y = NULL, fill = "# Services",
@@ -186,7 +191,7 @@ Let's suppose I want to find out which Service IDs lie in a particular intersect
 
 
 ```r
-four_cats %>% reduce(intersect)
+four_cats |> reduce(intersect)
 ```
 
 ```
@@ -203,7 +208,7 @@ And if we wanted the IDs intersecting the "OBS" and "IND" categories?
 list(
   four_cats$OBS,
   four_cats$IND
-) %>%
+) |>
   reduce(intersect)
 ```
 
@@ -223,16 +228,16 @@ Sometimes though we need something a little more scalable than a Venn diagram. T
 
 
 ```r
-set_df <- data_df %>%
-  filter(abbr %in% c("CAAH", "PAAS", "OBS", "IND")) %>%
-  group_by(id) %>%
-  mutate(category = list(cat)) %>%
-  distinct(id, category) %>%
-  group_by(category) %>%
-  mutate(n = n()) %>%
+set_df <- data_df |>
+  filter(abbr %in% c("CAAH", "PAAS", "OBS", "IND")) |>
+  group_by(id) |>
+  mutate(category = list(cat)) |>
+  distinct(id, category) |>
+  group_by(category) |>
+  mutate(n = n()) |>
   ungroup()
 
-set_df %>%
+set_df |>
   ggplot(aes(category)) +
   geom_bar(fill = cols[1]) +
   geom_label(aes(y = n, label = n), vjust = -0.1, size = 3, fill = cols[5]) +
@@ -253,16 +258,16 @@ Now let’s take a look at the intersections across all the categories. And let�
 
 
 ```r
-set_df <- data_df %>%
-  group_by(id) %>%
-  filter(n() == 1, lot == "Cloud Hosting") %>%
-  mutate(category = list(cat)) %>%
-  distinct(id, category) %>%
-  group_by(category) %>%
-  mutate(n = n()) %>%
+set_df <- data_df |>
+  group_by(id) |>
+  filter(n() == 1, lot == "Cloud Hosting") |>
+  mutate(category = list(cat)) |>
+  distinct(id, category) |>
+  group_by(category) |>
+  mutate(n = n()) |>
   ungroup()
 
-set_df %>%
+set_df |>
   ggplot(aes(category)) +
   geom_bar(fill = cols[2]) +
   geom_label(aes(y = n, label = n), vjust = -0.1, size = 3, fill = cols[3]) +
@@ -283,20 +288,20 @@ Suppose we want to extract the intersection data for the top intersections acros
 
 
 ```r
-cat_mix <- data_df %>%
-  filter(lot == "Cloud Hosting") %>%
-  mutate(x = cat) %>%
-  pivot_wider(id, names_from = cat, values_from = x, values_fill = "^") %>%
-  unite(col = intersect, -id, sep = "/") %>%
-  count(intersect) %>%
+cat_mix <- data_df |>
+  filter(lot == "Cloud Hosting") |>
+  mutate(x = cat) |>
+  pivot_wider(id, names_from = cat, values_from = x, values_fill = "^") |>
+  unite(col = intersect, -id, sep = "/") |>
+  count(intersect) |>
   mutate(
     intersect = str_replace_all(intersect, "(?:\\Q/^\\E|\\Q^/\\E)", ""),
     intersect = str_replace_all(intersect, "/", " | ")
-  ) %>%
-  arrange(desc(n)) %>%
+  ) |>
+  arrange(desc(n)) |>
   slice(1:21)
 
-cat_mix %>%
+cat_mix |>
   kbl(col.names = c("Intersecting Categories", "Services Count"))
 ```
 
@@ -322,7 +327,7 @@ cat_mix %>%
   </tr>
   <tr>
    <td style="text-align:left;"> Archiving Backup And Disaster Recovery </td>
-   <td style="text-align:right;"> 127 </td>
+   <td style="text-align:right;"> 126 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Compute And Application Hosting | Nosql Database | Relational Database | Other Database Services | Networking | Platform As A Service | Search | Block Storage | Object Storage | Other Storage Services </td>
@@ -399,16 +404,16 @@ And I can compare this table to the equivalent ggupset visualisation.
 
 
 ```r
-set_df <- data_df %>%
-  group_by(id) %>%
-  filter(lot == "Cloud Hosting") %>%
-  mutate(category = list(cat)) %>%
-  distinct(id, category) %>%
-  group_by(category) %>%
-  mutate(n = n()) %>%
+set_df <- data_df |>
+  group_by(id) |>
+  filter(lot == "Cloud Hosting") |>
+  mutate(category = list(cat)) |>
+  distinct(id, category) |>
+  group_by(category) |>
+  mutate(n = n()) |>
   ungroup()
 
-set_df %>%
+set_df |>
   ggplot(aes(category)) +
   geom_bar(fill = cols[5]) +
   geom_label(aes(y = n, label = n), vjust = -0.1, size = 3, fill = cols[4]) +
@@ -431,26 +436,26 @@ I won't print them all out though!
 
 
 ```r
-top5_int <- data_df %>%
-  filter(lot == "Cloud Hosting") %>%
-  select(id, abbr) %>%
-  mutate(x = abbr) %>%
-  pivot_wider(names_from = abbr, values_from = x, values_fill = "^") %>%
-  unite(col = intersect, -id, sep = "/") %>%
+top5_int <- data_df |>
+  filter(lot == "Cloud Hosting") |>
+  select(id, abbr) |>
+  mutate(x = abbr) |>
+  pivot_wider(names_from = abbr, values_from = x, values_fill = "^") |>
+  unite(col = intersect, -id, sep = "/") |>
   mutate(
     intersect = str_replace_all(intersect, "(?:\\Q/^\\E|\\Q^/\\E)", ""),
     intersect = str_replace(intersect, "/", " | ")
-  ) %>%
-  group_by(intersect) %>%
-  mutate(count = n_distinct(id)) %>%
-  arrange(desc(count), intersect, id) %>%
-  ungroup() %>%
-  add_count(intersect, wt = count, name = "temp") %>%
-  mutate(temp = dense_rank(desc(temp))) %>%
-  filter(temp %in% 1:5) %>%
+  ) |>
+  group_by(intersect) |>
+  mutate(count = n_distinct(id)) |>
+  arrange(desc(count), intersect, id) |>
+  ungroup() |>
+  add_count(intersect, wt = count, name = "temp") |>
+  mutate(temp = dense_rank(desc(temp))) |>
+  filter(temp %in% 1:5) |>
   distinct(id)
 
-top5_int %>%
+top5_int |>
   summarise(ids = n_distinct(id))
 ```
 
@@ -458,7 +463,7 @@ top5_int %>%
 ## # A tibble: 1 × 1
 ##     ids
 ##   <int>
-## 1  1317
+## 1  1316
 ```
 
 ## R Toolbox
@@ -487,7 +492,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> future </td>
-   <td style="text-align:left;"> plan[1] </td>
+   <td style="text-align:left;"> multicore[1];  plan[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> ggplot2 </td>
@@ -519,7 +524,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> rvest </td>
-   <td style="text-align:left;"> html_attr[2];  html_elements[3];  html_text[2];  read_html[3] </td>
+   <td style="text-align:left;"> html_attr[2];  html_elements[3];  html_text[2] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> stringr </td>

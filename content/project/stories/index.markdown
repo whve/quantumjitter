@@ -8,7 +8,7 @@ categories:
 tags:
   - geospatial
 summary: "A little interactive geospatial mapping and an unexpected find"
-lastmod: '2022-04-10'
+lastmod: '2022-04-21'
 draft: false
 featured: false
 ---
@@ -51,7 +51,7 @@ theme_set(theme_bw())
 zip_file <- "world_shape_file.zip"
 shape_file <- "TM_WORLD_BORDERS_SIMPL-0.3"
 
-str_c("http://thematicmapping.org/downloads/", shape_file, ".zip") %>%
+str_c("http://thematicmapping.org/downloads/", shape_file, ".zip") |>
   download.file(zip_file)
 
 unzip(zip_file)
@@ -88,13 +88,13 @@ ip_df <- map2_df(stats$IP, stats$Pages, function(x, y) {
       "latitude",
       "region_name"
     )
-  ) %>%
-    mutate(IP = x) %>%
+  ) |>
+    mutate(IP = x) |>
     rename(
       country = country_name,
       region = region_name,
       city = city_name
-    ) %>%
+    ) |>
     mutate(
       Pages = y,
       Views = case_when(
@@ -106,8 +106,8 @@ ip_df <- map2_df(stats$IP, stats$Pages, function(x, y) {
     )
 })
 
-ip_df <- ip_df %>%
-  filter(!is.na(longitude) | !is.na(latitude)) %>%
+ip_df <- ip_df |>
+  filter(!is.na(longitude) | !is.na(latitude)) |>
   arrange(Pages)
 ```
 
@@ -122,11 +122,11 @@ pal <-
     domain = c(1, 2, 3, 4)
   )
 
-map1 <- leaflet(world_spdf) %>% # World view
+map1 <- leaflet(world_spdf) |> # World view
   addProviderTiles(providers$CartoDB.Positron,
     options = providerTileOptions(maxZoom = 21)
-  ) %>%
-  setView(-30, 35, zoom = 2) %>% # World view
+  ) |>
+  setView(-30, 35, zoom = 2) |> # World view
   addPolygons(
     fillColor = cols[1],
     stroke = TRUE,
@@ -144,7 +144,7 @@ map1 <- leaflet(world_spdf) %>% # World view
       style = list("font-weight" = "normal"),
       textsize = "12px"
     )
-  ) %>%
+  ) |>
   addCircleMarkers(
     lng = ip_df$longitude,
     lat = ip_df$latitude,
@@ -169,7 +169,7 @@ map1 <- leaflet(world_spdf) %>% # World view
       " ",
       "page views"
     )
-  ) %>%
+  ) |>
   addLegend(
     colors = cols[c(2:5)],
     labels = c("<500", "500+", "1,000+", "2,000+"),

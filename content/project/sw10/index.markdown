@@ -7,7 +7,7 @@ categories:
   - R
 tags:
 summary: "A series of events, such as the Financial Crisis and the 2016 Brexit vote, that damped down residential property sales in London"
-lastmod: '2022-04-10'
+lastmod: '2022-04-21'
 draft: false
 featured: false
 ---
@@ -96,16 +96,16 @@ The focus is on the [standard price paid](https://www.gov.uk/guidance/about-the-
 
 
 ```r
-data_tidy <- data_list$results %>%
-  as_tibble() %>%
+data_tidy <- data_list$results |>
+  as_tibble() |>
   mutate(
-    date = new_datetime(ppd_transactionDate) %>% as_date(),
-    amount = ppd_pricePaid / 1000000,
+    date = new_datetime(ppd_transactionDate) |> as_date(),
+    amount = ppd_pricePaid,
     prop_type = str_extract(ppd_propertyType, "(?<=common/)[\\w]+"),
     est_type = str_extract(ppd_estateType, "(?<=common/)[\\w]+"),
     cat = str_remove(ppd_transactionCategory, "<http://landregistry.data.gov.uk/def/ppi/"),
     prop_type = recode(prop_type, otherPropertyType = "Other")
-  ) %>%
+  ) |>
   filter(str_detect(cat, "standard"))
 ```
 
@@ -125,10 +125,10 @@ events <- tribble(
   "07-08-09", "Financial Crisis",
   "16-06-23", "Brexit Vote",
   "20-03-23", "Covid-19 Lockdown"
-) %>%
+) |>
   mutate(date = date_parse(date, format = "%y-%m-%d"))
 
-events %>% 
+events |> 
   kbl(col.names = c("Date", "Event"))
 ```
 
@@ -187,9 +187,9 @@ Visually, it appears that the financial crisis had a big impact on sales volume,
 
 
 ```r
-to_date <- date_format(max(data_tidy$date), format = "%b %d, %Y")
+to_date <- data_tidy |> summarise(max(date)) |> pull() |> date_format(format = "%b %d, %Y")
 
-data_tidy %>%
+data_tidy |>
   ggplot(aes(date, amount, colour = est_type)) +
   geom_point(alpha = 0.2, size = 0.7, show.legend = FALSE) +
   geom_smooth(se = FALSE, aes(linetype = est_type), size = 1.2) +
@@ -203,14 +203,15 @@ data_tidy %>%
     caption = "Source: HM Land Registry"
   ) +
   geom_vline(xintercept = events$date, size = 0.5, lty = 2, alpha = 0.4) +
-  annotate("text", events$date, 5,
+  annotate("text", events$date, 5000000,
     angle = 90,
     label = events$change, vjust = 1.4, hjust = 1, size = 3, fontface = 2
   ) +
-  coord_cartesian(ylim = c(0, 5)) +
+  coord_cartesian(ylim = c(0, 5000000)) +
   scale_colour_manual(values = cols[c(2, 3)]) +
   scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
-  scale_y_continuous(labels = dollar_format(accuracy = 1, prefix = "£", suffix = "m"))
+  scale_y_continuous(labels = label_dollar(accuracy = 0.1, prefix = "£", 
+                                           scale_cut = cut_short_scale()))
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="100%" />
@@ -219,37 +220,37 @@ An alternative way of looking at this is by median quarterly prices (with upper 
 
 
 ```r
-qtr_start <- date_today("Europe/London") %>% 
+qtr_start <- date_today("Europe/London") |> 
   lubridate::floor_date("quarter")
 
 data_qtile <- 
-  data_tidy %>% 
-  filter(date < qtr_start) %>% 
-  mutate(yr_qtr = yearquarter(date)) %>% 
-  group_by(yr_qtr) %>% 
+  data_tidy |> 
+  filter(date < qtr_start) |> 
+  mutate(yr_qtr = yearquarter(date)) |> 
+  group_by(yr_qtr) |> 
   summarise(price = quantile(amount, c(0.25, 0.5, 0.75)), 
-            quantile = c("lower", "median", "upper") %>% factor(),
-            n = n()) %>% 
-  ungroup() %>% 
+            quantile = c("lower", "median", "upper") |> factor(),
+            n = n()) |> 
+  ungroup() |> 
   pivot_wider(names_from = quantile, values_from = price)
 
-last <- data_qtile %>% summarise(max(yr_qtr)) %>% pull()
-first <- data_qtile %>% summarise(min(yr_qtr)) %>% pull()
+last <- data_qtile |> summarise(max(yr_qtr)) |> pull()
+first <- data_qtile |> summarise(min(yr_qtr)) |> pull()
 
-p1 <- data_qtile %>% 
+p1 <- data_qtile |> 
   ggplot(aes(yr_qtr, median)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = cols[5]) +
   geom_line(colour = "white") +
-  geom_hline(yintercept = 1, linetype = "dashed") +
-  annotate("text", x = 17700, y = 0.3, label = "Covid-19\nLockdown", size = 3) +
+  geom_hline(yintercept = 1000000, linetype = "dashed") +
+  annotate("text", x = 17700, y = 300000, label = "Covid-19\nLockdown", size = 3) +
   scale_x_yearquarter(date_breaks = "2 years") +
-  scale_y_log10(labels = dollar_format(accuracy = 0.1, prefix = "£", suffix = "m")) +
+  scale_y_log10(labels = label_dollar(prefix = "£", scale_cut = cut_short_scale())) +
   labs(title = glue("Median Quarterly SW10 Property Prices ({first} to {last})"), 
        subtitle = "With Upper / Lower Price Quartiles & Sales Volume",
        x = NULL, y = "Price (Log10 Scale)") +
   theme(axis.text.x = element_blank())
 
-p2 <- data_qtile %>% 
+p2 <- data_qtile |> 
   ggplot(aes(yr_qtr, n)) +
   geom_line() +
   annotate("text", x = 14100, y = 180, label = "Financial\nCrisis", size = 3) +
@@ -268,9 +269,9 @@ The composition of SW10 reveals the postal area to be overwhelmingly dominated b
 
 
 ```r
-trans <- data_tidy %>% nrow()
+trans <- data_tidy |> nrow()
 
-data_tidy %>% 
+data_tidy |> 
   ggplot() +
   geom_mosaic(aes(product(prop_type, est_type), fill = prop_type), 
               offset = 0.02, divider = mosaic("h")) +
@@ -310,7 +311,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> dplyr </td>
-   <td style="text-align:left;"> filter[7];  arrange[2];  desc[2];  group_by[2];  if_else[3];  mutate[7];  n[2];  pull[2];  recode[1];  summarise[4];  ungroup[1] </td>
+   <td style="text-align:left;"> filter[7];  arrange[2];  desc[2];  group_by[2];  if_else[3];  mutate[7];  n[2];  pull[3];  recode[1];  summarise[5];  ungroup[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> ggmosaic </td>
@@ -342,7 +343,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> scales </td>
-   <td style="text-align:left;"> comma[1];  dollar_format[2] </td>
+   <td style="text-align:left;"> comma[1];  cut_short_scale[2];  label_dollar[2] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> SPARQL </td>

@@ -10,7 +10,7 @@ tags:
   - statistics
   - apps
 summary: "Do we see more planning applications when house sales are depressed?"
-lastmod: '2022-04-10'
+lastmod: '2022-04-22'
 draft: false
 featured: false
 ---
@@ -73,7 +73,7 @@ case_df <- readRDS("case.rds")
 # 
 # file_name <- basename(url)
 # 
-# url %>% basename
+# url |> basename
 # 
 # download.file(url, file_name)
 
@@ -84,22 +84,22 @@ The data need a bit of wrangling.  And there is also the opportunity to try the 
 
 
 ```r
-wide_df <- case_df %>%
-  pivot_wider(names_from = X1, values_from = X2) %>%
-  select(all_of(plan_colnames)) %>%
+wide_df <- case_df |>
+  pivot_wider(names_from = X1, values_from = X2) |>
+  select(all_of(plan_colnames)) |>
   mutate(across(c(property_list, property_cons), ~na_if(., "N/A")),
          across(c(app_comp, decision), ~na_if(., "")))
 
-tidy_df <- wide_df %>%
+tidy_df <- wide_df |>
   mutate(
     dec_date = date_parse(dec_date, format = "%d %b %Y"),
     dec_year = get_year(dec_date),
     proposal_dev = str_to_lower(proposal_dev),
     property_pcode = str_extract(property_add, "SW10[\\s]?\\d[[:alpha:]]{2}"),
     property_pcode = str_replace(property_pcode, "SW10(?!\\s)", "SW10 "),
-    app_comp = str_to_upper(app_comp) %>%
-      str_remove_all("[:punct:]") %>%
-      str_remove_all("\\b(?:AND|LTD|CO|LIMITED|UK|GROUP|LLP)\\b") %>%
+    app_comp = str_to_upper(app_comp) |>
+      str_remove_all("[:punct:]") |>
+      str_remove_all("\\b(?:AND|LTD|CO|LIMITED|UK|GROUP|LLP)\\b") |>
       str_squish(),
     decision = fct_explicit_na(decision, na_level = "Other"),
     decision = str_replace(decision, "/", " / "),
@@ -119,12 +119,12 @@ tidy_df <- wide_df %>%
     ),
     across(where(is.character), str_trim),
     across(c("app_comp", "proposal_type", "property_cons"), factor)
-  ) %>%
+  ) |>
   left_join(geocodes, by = c("property_pcode" = "postcode"))
 
-tidy_df %>%
-  count(dec_lump) %>%
-  arrange(desc(n)) %>%
+tidy_df |>
+  count(dec_lump) |>
+  arrange(desc(n)) |>
   kbl(col.names = c("Decision", "Count"))
 ```
 
@@ -193,19 +193,19 @@ plus_words <-
     "erection"
   )
 
-words <- tidy_df %>% 
+words <- tidy_df |> 
   corpus(text_field = "proposal_dev", 
          doc_vars = c("dec_date", "proposal_type", 
-                      "decision", "dec_year")) %>% 
+                      "decision", "dec_year")) |> 
   dfm(
     remove = c(stopwords("english"), plus_words),
     remove_numbers = TRUE,
-    remove_punct = TRUE) %>% 
-  textstat_frequency() %>% 
-  slice_head(n = 30) %>% 
+    remove_punct = TRUE) |> 
+  textstat_frequency() |> 
+  slice_head(n = 30) |> 
   mutate(feature = fct_reorder(feature, frequency))
 
-words %>% 
+words |> 
   ggplot(aes(feature, frequency)) +
   geom_col(fill = cols[4]) +
   coord_flip() +
@@ -220,7 +220,7 @@ Now I can create a theme feature.
 
 
 ```r
-tidy_df <- tidy_df %>%
+tidy_df <- tidy_df |>
   mutate(
     theme = case_when(
       str_detect(proposal_dev, "basement|excav") ~ "Basement or Excavation",
@@ -289,39 +289,39 @@ toc()
 ```
 
 ```
-## 115.539 sec elapsed
+## 111.924 sec elapsed
 ```
 
 Let's now bind the data into one tibble and summarise the transaction volumes over time.
 
 
 ```r
-sales_df <- sales$results %>% 
-  as_tibble() %>%
+sales_df <- sales$results |> 
+  as_tibble() |>
   mutate(
-    date = new_datetime(ppd_transactionDate) %>% as_date(),
+    date = new_datetime(ppd_transactionDate) |> as_date(),
     dataset = "Sales"
-  ) %>%
-  group_by(date, dataset) %>%
-  summarise(volume = n()) %>%
+  ) |>
+  group_by(date, dataset) |>
+  summarise(volume = n()) |>
   ungroup()
 
-app_df <- tidy_df %>%
+app_df <- tidy_df |>
   mutate(
     date = dec_date,
     dataset = "Planning"
-  ) %>%
-  group_by(date, dataset) %>%
-  summarise(volume = n()) %>%
+  ) |>
+  group_by(date, dataset) |>
+  summarise(volume = n()) |>
   ungroup()
 
 compare_df <- bind_rows(app_df, sales_df)
 
-summary_df <- compare_df %>%
-  filter(date >= min(sales_df$date)) %>% 
-  mutate(date = date_build(get_year(date), get_month(date), "last")) %>% 
-  group_by(date, dataset) %>%
-  summarise(volume = sum(volume)) %>% 
+summary_df <- compare_df |>
+  filter(date >= min(sales_df$date)) |> 
+  mutate(date = date_build(get_year(date), get_month(date), "last")) |> 
+  group_by(date, dataset) |>
+  summarise(volume = sum(volume)) |> 
   ungroup()
 ```
 
@@ -329,11 +329,11 @@ The visualisation below does suggest that home owners "start digging" when they 
 
 
 ```r
-monthly_ts <- summary_df %>% 
-  mutate(date = yearmonth(date)) %>% 
+monthly_ts <- summary_df |> 
+  mutate(date = yearmonth(date)) |> 
   as_tsibble(key = dataset, index = date)
 
-monthly_ts %>% 
+monthly_ts |> 
   ggplot(aes(date, volume, colour = dataset)) +
   geom_line(key_glyph = "timeseries") +
   scale_colour_manual(values = cols[c(2, 3)]) +
@@ -349,9 +349,9 @@ Time-series data may have an underlying trend and a seasonality pattern. I'll us
 
 
 ```r
-monthly_ts %>%
-  model(stl = STL(volume ~ season())) %>%
-  components() %>% 
+monthly_ts |>
+  model(stl = STL(volume ~ season())) |>
+  components() |> 
   autoplot() +
   scale_colour_manual(values = cols[c(2, 3)]) +
   labs(x = NULL, title = "Timeseries Decomposition")
@@ -363,9 +363,9 @@ We also see some inverse correlation between the two time-series re-affirming th
 
 
 ```r
-monthly_ts %>% 
-  pivot_wider(names_from = dataset, values_from = volume) %>%
-  CCF(Sales, Planning, lag_max = 6) %>% 
+monthly_ts |> 
+  pivot_wider(names_from = dataset, values_from = volume) |>
+  CCF(Sales, Planning, lag_max = 6) |> 
   autoplot() +
   labs(title = "Correlation Between Sales & Planning") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -377,9 +377,9 @@ The overall volumes of planning applications and house transactions in SW10 are 
 
 
 ```r
-summary_df %>%
-  group_by(dataset) %>%
-  summarise(total = sum(volume)) %>% 
+summary_df |>
+  group_by(dataset) |>
+  summarise(total = sum(volume)) |> 
   kbl(col.names = c("Dataset", "Count"))
 ```
 
@@ -406,7 +406,7 @@ Earlier, I added a "theme" feature to the data. So let's take a look at the volu
 
 
 ```r
-tidy_df %>%
+tidy_df |>
   ggplot(aes(dec_year, fill = outcome)) +
   geom_bar() +
   facet_wrap( ~ theme, nrow = 2) +
@@ -490,7 +490,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> rvest </td>
-   <td style="text-align:left;"> html_attr[1];  html_element[2];  html_elements[2];  html_table[1];  html_text[1];  read_html[3] </td>
+   <td style="text-align:left;"> html_attr[1];  html_element[2];  html_elements[2];  html_table[1];  html_text[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> SPARQL </td>

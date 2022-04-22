@@ -8,7 +8,7 @@ categories:
 tags:
   - statistics
 summary: "Exploring parliamentary voting patterns with hierarchical clustering"
-lastmod: '2022-04-10'
+lastmod: '2022-04-22'
 draft: false
 featured: false
 ---
@@ -55,8 +55,8 @@ I'll start by building a list of all Labour Party MPs.
 ```r
 url_prefix <- "http://data.parliament.uk/members/"
 
-mps <- commons_members() %>%
-  filter(party_value == "Labour" | about == str_c(url_prefix, "478")) %>%
+mps <- commons_members() |>
+  filter(party_value == "Labour" | about == str_c(url_prefix, "478")) |>
   mutate(ID = str_replace(about, url_prefix, ""))
 
 saveRDS(mps, file = "mps.rds")
@@ -77,7 +77,7 @@ pull_votes <- function(x) {
     start_date = start_date,
     end_date = end_date,
     verbose = FALSE
-  ) %>%
+  ) |>
     mutate(mp = x)
 }
 ```
@@ -87,9 +87,9 @@ I'll use it to extract the "aye" and "no" votes. Use of `possibly` prevents the 
 
 ```r
 votes <-
-  map(mps$ID, possibly(pull_votes, NULL)) %>%
-  compact() %>%
-  map_dfr(simplify, "tibbles") %>%
+  map(mps$ID, possibly(pull_votes, NULL)) |>
+  compact() |>
+  map_dfr(simplify, "tibbles") |>
   rename("lobby" = "vote")
 
 saveRDS(votes, file = "votes.rds")
@@ -101,16 +101,16 @@ Voting the opposite way to the majority of the party, as well as non-votes, will
 
 
 ```r
-votes_df <- votes %>%
-  left_join(mps, by = c("mp" = "ID")) %>%
-  select(about = about.x, title, date_value, lobby, mp, name = full_name_value) %>%
+votes_df <- votes |>
+  left_join(mps, by = c("mp" = "ID")) |>
+  select(about = about.x, title, date_value, lobby, mp, name = full_name_value) |>
   transmute(
     vote = if_else(lobby == "aye", 1, -1),
     mp = str_c(name, " (", mp, ")"),
     about = str_replace(about, "http://data.parliament.uk/resources/", ""),
     title = str_c(title, " (", about, ")")
-  ) %>% 
-  select(-about) %>% 
+  ) |> 
+  select(-about) |> 
   pivot_wider(names_from = title, values_from = vote, values_fill = 0)
 ```
 
@@ -119,17 +119,17 @@ The data are standardised (i.e. scaled) to ensure comparability. This is verifie
 
 ```r
 scaled_df <-
-  votes_df %>%
+  votes_df |>
   mutate(across(-mp, scale))
 
-scaled_df %>%
-  summarise(across(-mp, list(mean = mean, sd = sd))) %>%
+scaled_df |>
+  summarise(across(-mp, list(mean = mean, sd = sd))) |>
   summarise(
     sd_min = min(c_across(ends_with("_sd"))),
     sd_max = max(c_across(ends_with("_sd"))),
     mean_min = min(c_across(ends_with("_mean"))),
     mean_max = max(c_across(ends_with("_mean")))
-  ) %>%
+  ) |>
   kbl()
 ```
 
@@ -159,9 +159,9 @@ If the [Hopkins statistic](https://en.wikipedia.org/wiki/Hopkins_statistic) is c
 
 
 ```r
-scaled_df %>%
-  select(-mp) %>%
-  get_clust_tendency(nrow(votes_df) - 1) %>%
+scaled_df |>
+  select(-mp) |>
+  get_clust_tendency(nrow(votes_df) - 1) |>
   pluck("hopkins_stat")
 ```
 
@@ -173,9 +173,9 @@ A visual assessment of clustering tendency reveals distance data exhibiting a vi
 
 
 ```r
-scaled_df %>%
-  select(-mp) %>%
-  dist() %>%
+scaled_df |>
+  select(-mp) |>
+  dist() |>
   fviz_dist(
     show_labels = FALSE,
     gradient = list(
@@ -194,8 +194,8 @@ The correlation plot below shows that the *median* and *ward* methods have a wea
 
 
 ```r
-orig_dist <- scaled_df %>%
-  select(-mp) %>%
+orig_dist <- scaled_df |>
+  select(-mp) |>
   dist()
 
 dend_meths <-
@@ -212,15 +212,15 @@ dend_meths <-
 
 dend_list <-
   map(dend_meths, function(x) {
-    orig_dist %>%
-      hclust(x) %>%
+    orig_dist |>
+      hclust(x) |>
       as.dendrogram()
-  }) %>%
-  reduce(., dendlist) %>%
-  set_names(dend_meths)
+  })
 
-dend_list %>%
-  cor.dendlist() %>%
+dend_list |>
+  reduce(dendlist) |>
+  set_names(dend_meths) |>
+  cor.dendlist() |>
   corrplot(
     "pie",
     "lower",
@@ -252,8 +252,8 @@ methods <- list(
 
 best_method <- map_dfr(methods, function(x) {
   co_comp <-
-    orig_dist %>%
-    hclust(x) %>%
+    orig_dist |>
+    hclust(x) |>
     cophenetic()
   tibble(
     correlation = cor(orig_dist, co_comp),
@@ -266,7 +266,7 @@ The plot below confirms the *ward* and *median* methods having a weaker fit. *Av
 
 
 ```r
-best_method %>%
+best_method |>
   ggplot(aes(reorder(method, correlation), correlation)) +
   geom_col(fill = cols[1], width = 0.8) +
   geom_text(aes(label = str_c(method, "  ", round(correlation, 2))),
@@ -286,20 +286,20 @@ I can now plot the full Labour Party dendrogram using the *average* method. This
 
 
 ```r
-dend_avg <- orig_dist %>%
-  hclust("average") %>%
+dend_avg <- orig_dist |>
+  hclust("average") |>
   as.dendrogram()
 
 labels(dend_avg) <- scaled_df$mp[order.dendrogram(dend_avg)]
 
-dend <- dend_avg %>%
-  color_branches(k = 2, col = cols[4]) %>%
+dend <- dend_avg |>
+  color_branches(k = 2, col = cols[4]) |>
   set("labels_cex", 0.4)
 
-start_formatted <- date_parse(start_date, format = "%Y-%m-%d") %>% 
+start_formatted <- date_parse(start_date, format = "%Y-%m-%d") |> 
   date_format(format = "%b %d, %Y")
 
-end_formatted <- date_parse(end_date, format = "%Y-%m-%d") %>% 
+end_formatted <- date_parse(end_date, format = "%Y-%m-%d") |> 
   date_format(format = "%b %d, %Y")
 
 ggplot(rev(dend), horiz = TRUE, offset_labels = -0.2) +
@@ -318,13 +318,13 @@ I'll zoom in on the "cluster of six".
 
 
 ```r
-dend_cuts <- dend %>%
-  assign_values_to_leaves_nodePar(19, "pch") %>%
-  assign_values_to_leaves_nodePar(5, "cex") %>%
-  assign_values_to_leaves_nodePar(cols[1], "col") %>%
-  set("labels_cex", 0.4) %>%
-  set("branches_lwd", 2.5) %>%
-  color_branches(k = 2, col = cols[1]) %>%
+dend_cuts <- dend |>
+  assign_values_to_leaves_nodePar(19, "pch") |>
+  assign_values_to_leaves_nodePar(5, "cex") |>
+  assign_values_to_leaves_nodePar(cols[1], "col") |>
+  set("labels_cex", 0.4) |>
+  set("branches_lwd", 2.5) |>
+  color_branches(k = 2, col = cols[1]) |>
   cut(h = 50)
 
 ggplot(rev(dend_cuts$lower[[1]]),
@@ -346,19 +346,19 @@ Summarising and sorting the total votes by MP tells me that the "cluster of six"
 
 
 ```r
-fewest_votes <- votes %>%
-  left_join(mps, by = c("mp" = "ID")) %>%
-  group_by(mp = full_name_value, lobby) %>%
-  summarise(n_lobby = n()) %>%
-  ungroup() %>% 
-  pivot_wider(names_from = "lobby", values_from = "n_lobby") %>%
+fewest_votes <- votes |>
+  left_join(mps, by = c("mp" = "ID")) |>
+  group_by(mp = full_name_value, lobby) |>
+  summarise(n_lobby = n()) |>
+  ungroup() |> 
+  pivot_wider(names_from = "lobby", values_from = "n_lobby") |>
   mutate(total = aye + no,
-         mp = fct_reorder(mp, total)) %>%
-  slice_min(n = 10, order_by = total) %>%
-  pivot_longer(cols = -mp) %>%
+         mp = fct_reorder(mp, total)) |>
+  slice_min(n = 10, order_by = total) |>
+  pivot_longer(cols = -mp) |>
   filter(name != "total")
 
-fewest_votes %>%
+fewest_votes |>
   ggplot(aes(mp, value, fill = name)) +
   geom_col() +
   geom_label(aes(label = value), position = position_stack()) +
@@ -376,13 +376,13 @@ Non-voting will not be the only influencing factor. The "distant cluster" will b
 
 
 ```r
-tidy_df <- votes_df %>%
+tidy_df <- votes_df |>
   pivot_longer(cols = -mp, names_to = "title", values_to = "vote")
 
 mod <- lm(vote ~ ., data = tidy_df)
 
-mod_df <- mod %>%
-  augment() %>%
+mod_df <- mod |>
+  augment() |>
   as_tibble()
 
 ggplot(mod_df, aes(title, .cooksd, colour = mp)) +
@@ -402,9 +402,9 @@ ggplot(mod_df, aes(title, .cooksd, colour = mp)) +
 
 
 ```r
-mod_df %>%
-  filter(str_detect(title, "759161|824379|809989")) %>%
-  mutate(title = str_wrap(title, 30)) %>% 
+mod_df |>
+  filter(str_detect(title, "759161|824379|809989")) |>
+  mutate(title = str_wrap(title, 30)) |> 
   ggplot(aes(title, .cooksd, colour = mp)) +
   geom_point(size = 4) +
   geom_label_repel(aes(label = if_else(.cooksd > 0.0015, mp, NULL)), size = 4) +

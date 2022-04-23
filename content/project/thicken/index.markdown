@@ -9,7 +9,7 @@ tags:
   - apps
   - web scraping
 summary: Every story needs a good plot. Which plot types generate the most interest on Wikipedia?
-lastmod: '2022-04-10'
+lastmod: '2022-04-23'
 draft: false
 featured: false
 ---
@@ -50,10 +50,12 @@ I'm going to start by harvesting some data from Wikipedia's [Statistical charts 
 
 ```r
 charts <-
-  read_html("https://en.wikipedia.org/wiki/Category:Statistical_charts_and_diagrams") %>%
-  html_elements(".mw-category-group a") %>%
-  html_text() %>%
-  tibble(chart = .)
+  tibble(
+    chart = read_html(str_c("https://en.wikipedia.org/wiki/", 
+      "Category:Statistical_charts_and_diagrams")) |>
+      html_elements(".mw-category-group a") |>
+      html_text()
+  )
 ```
 
 The pageviews package provides an API into Wikipedia. I'll create a function wrapped around `article_pageviews` so I can later iterate through a subset of the list established in the prior code chunk.
@@ -136,7 +138,7 @@ Profvis also showed that attempting to round the corners of the `plot.background
 server <- function(input, output, session) {
   subsetr <- reactive({
     req(input$article)
-    pageviews <- map_dfr(input$article, pv) %>%
+    pageviews <- map_dfr(input$article, pv) |>
       mutate(
         date = date_parse(as.character(date), format = "%Y-%m-%d"),
         article = str_replace_all(article, "_", " ")
@@ -254,7 +256,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> stringr </td>
-   <td style="text-align:left;"> str_c[5];  str_count[1];  str_detect[2];  str_remove[2];  str_remove_all[1];  str_replace_all[1];  str_starts[1] </td>
+   <td style="text-align:left;"> str_c[6];  str_count[1];  str_detect[2];  str_remove[2];  str_remove_all[1];  str_replace_all[1];  str_starts[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> tibble </td>

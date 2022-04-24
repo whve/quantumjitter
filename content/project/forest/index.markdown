@@ -9,7 +9,7 @@ tags:
   - machine learning
   - statistics
 summary: Criminal goings-on in a random forest and predictions with other models from the Tidymodels framework.
-lastmod: '2022-04-10'
+lastmod: '2022-04-24'
 draft: false
 featured: false
 ---
@@ -40,10 +40,10 @@ This custom palette was created in [Adobe Colour](https://color.adobe.com/create
 ```r
 theme_set(theme_bw())
 
-cols <- c("#D9B26A", "#D9CAAD", "#402208", "#8C633F", "#0D0D0D") %>%
+cols <- c("#D9B26A", "#D9CAAD", "#402208", "#8C633F", "#0D0D0D") |>
   fct_inorder()
 
-tibble(x = 1:5, y = 1) %>%
+tibble(x = 1:5, y = 1) |>
   ggplot(aes(x, y, fill = cols)) +
   geom_col() +
   geom_label(aes(label = cols), size = 4, vjust = 2, fill = "white") +
@@ -76,14 +76,14 @@ url <- str_c(
 )
 
 raw_df <-
-  read_csv(url, col_types = "cfcfdn") %>%
-  clean_names() %>%
+  read_csv(url, col_types = "cfcfdn") |>
+  clean_names() |>
   mutate(
     year = str_extract(year, "(?:1999|200[0-9]|201[0-7])"), # 1999-2007
     year = as.numeric(year)
-  ) %>%
-  group_by(year, borough, offences) %>%
-  summarise(number_of_offences = sum(number_of_offences)) %>%
+  ) |>
+  group_by(year, borough, offences) |>
+  summarise(number_of_offences = sum(number_of_offences)) |>
   ungroup()
 ```
 
@@ -91,8 +91,8 @@ A faceted plot is one way to get a sense of the data.
 
 
 ```r
-raw_df %>%
-  mutate(borough = str_wrap(borough, 11)) %>%
+raw_df |>
+  mutate(borough = str_wrap(borough, 11)) |>
   ggplot(aes(year, number_of_offences, colour = offences, group = offences)) +
   geom_line() +
   facet_wrap(~borough, scales = "free_y", ncol = 4) +
@@ -117,7 +117,7 @@ Nonetheless, one can anyway see there are data aggregated at multiple levels. So
 
 
 ```r
-crime_df <- raw_df %>%
+crime_df <- raw_df |>
   filter(
     offences != "All recorded offences",
     !borough %in% c(
@@ -137,17 +137,17 @@ Before modelling, I'll visualise the dependent variable against each independent
 
 
 ```r
-crime_df %>%
-  group_by(offences, borough) %>%
-  summarise(number_of_offences = sum(number_of_offences)) %>%
-  group_by(offences) %>%
+crime_df |>
+  group_by(offences, borough) |>
+  summarise(number_of_offences = sum(number_of_offences)) |>
+  group_by(offences) |>
   mutate(
     median_offences = median(number_of_offences),
     offences = str_wrap(offences, 10),
-  ) %>%
+  ) |>
   ggplot(aes(fct_reorder(offences, median_offences), number_of_offences)) +
   geom_boxplot(fill = cols[1]) +
-  scale_y_log10(labels = comma) +
+  scale_y_log10(labels = label_number(scale_cut = cut_short_scale())) +
   labs(
     x = NULL, y = NULL,
     title = "Number of Offences by Type",
@@ -159,17 +159,17 @@ crime_df %>%
 
 
 ```r
-crime_df %>%
-  group_by(offences, borough) %>%
-  summarise(number_of_offences = sum(number_of_offences)) %>%
-  group_by(borough) %>%
+crime_df |>
+  group_by(offences, borough) |>
+  summarise(number_of_offences = sum(number_of_offences)) |>
+  group_by(borough) |>
   mutate(
     median_offences = median(number_of_offences),
     offences = str_wrap(offences, 10),
-  ) %>%
+  ) |>
   ggplot(aes(fct_reorder(borough, median_offences), number_of_offences)) +
   geom_boxplot(fill = cols[1]) +
-  scale_y_log10(labels = comma) +
+  scale_y_log10(labels = label_number(scale_cut = cut_short_scale())) +
   coord_flip() +
   labs(
     x = NULL, y = NULL,
@@ -184,13 +184,13 @@ The offences and borough variables show significant variation in crime counts. A
 
 
 ```r
-crime_df %>%
-  group_by(year) %>%
-  summarise(number_of_offences = sum(number_of_offences)) %>%
+crime_df |>
+  group_by(year) |>
+  summarise(number_of_offences = sum(number_of_offences)) |>
   ggplot(aes(year, number_of_offences)) +
   geom_line(colour = cols[4], linetype = "dashed") +
   geom_smooth(colour = cols[5], fill = cols[1]) +
-  scale_y_continuous(labels = comma) +
+  scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
   labs(
     x = NULL, y = NULL,
     title = "Number of Offences by Year",
@@ -207,13 +207,13 @@ I'll separate out some test data so I can compare the performance of the models 
 set.seed(123)
 
 data_split <- 
-  crime_df %>%
+  crime_df |>
   initial_split(strata = offences)
 
-crime_train <- data_split %>%
+crime_train <- data_split |>
   training()
 
-crime_test <- data_split %>%
+crime_test <- data_split |>
   testing()
 ```
 
@@ -224,9 +224,9 @@ Whilst `borough` and `offences` are nominal, I'm not creating any dummy variable
 
 ```r
 crime_recipe <-
-  crime_train %>%
-  recipe() %>%
-  update_role(number_of_offences, new_role = "outcome") %>%
+  crime_train |>
+  recipe() |>
+  update_role(number_of_offences, new_role = "outcome") |>
   update_role(-has_role("outcome"), new_role = "predictor")
 
 summary(crime_recipe)
@@ -249,19 +249,19 @@ Clearly there is a temporal component too otherwise there would be no trend.
 
 ```r
 rp_model <- 
-  decision_tree() %>%
-  set_engine("rpart") %>%
+  decision_tree() |>
+  set_engine("rpart") |>
   set_mode("regression")
 
-rp_wflow <- workflow() %>%
-  add_recipe(crime_recipe) %>%
+rp_wflow <- workflow() |>
+  add_recipe(crime_recipe) |>
   add_model(rp_model)
 
-rp_fit <- rp_wflow %>% 
+rp_fit <- rp_wflow |> 
   fit(crime_train)
 
-rp_fit %>%
-  pull_workflow_fit() %>% 
+rp_fit |>
+  pull_workflow_fit() |> 
   vip(aesthetics = list(fill = cols[1])) +
   labs(title = "Feature Importance -- rpart")
 ```
@@ -269,8 +269,8 @@ rp_fit %>%
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-11-1.png" width="100%" />
 
 ```r
-rp_results <- rp_fit %>% 
-  augment(crime_test) %>% 
+rp_results <- rp_fit |> 
+  augment(crime_test) |> 
   mutate(model = "rpart")
 ```
 
@@ -279,19 +279,19 @@ Ranger is an implementation of random forests or recursive partitioning that, ac
 
 ```r
 ranger_model <- 
-  rand_forest() %>%
-  set_engine("ranger", mtry = 2, importance = "impurity") %>%
+  rand_forest() |>
+  set_engine("ranger", mtry = 2, importance = "impurity") |>
   set_mode("regression")
 
-ranger_wflow <- workflow() %>%
-  add_recipe(crime_recipe) %>%
+ranger_wflow <- workflow() |>
+  add_recipe(crime_recipe) |>
   add_model(ranger_model)
 
-ranger_fit <- ranger_wflow %>% 
+ranger_fit <- ranger_wflow |> 
   fit(crime_train)
 
-ranger_fit %>%
-  pull_workflow_fit() %>% 
+ranger_fit |>
+  pull_workflow_fit() |> 
   vip(aesthetics = list(fill = cols[3])) +
   labs(title = "Feature Importance -- Ranger")
 ```
@@ -299,8 +299,8 @@ ranger_fit %>%
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-12-1.png" width="100%" />
 
 ```r
-ranger_results <- ranger_fit %>% 
-  augment(crime_test) %>% 
+ranger_results <- ranger_fit |> 
+  augment(crime_test) |> 
   mutate(model = "ranger")
 ```
 
@@ -309,19 +309,19 @@ And of course my project title would make little sense without a Random Forest.
 
 ```r
 rf_model <- 
-  rand_forest() %>%
-  set_engine("randomForest", mtry = 2) %>%
+  rand_forest() |>
+  set_engine("randomForest", mtry = 2) |>
   set_mode("regression")
 
-rf_wflow <- workflow() %>%
-  add_recipe(crime_recipe) %>%
+rf_wflow <- workflow() |>
+  add_recipe(crime_recipe) |>
   add_model(rf_model)
 
-rf_fit <- rf_wflow %>% 
+rf_fit <- rf_wflow |> 
   fit(crime_train)
 
-rf_fit %>%
-  pull_workflow_fit() %>% 
+rf_fit |>
+  pull_workflow_fit() |> 
   vip(aesthetics = list(fill = cols[5])) +
   labs(title = "Feature Importance -- Random Forest")
 ```
@@ -329,8 +329,8 @@ rf_fit %>%
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-13-1.png" width="100%" />
 
 ```r
-rf_results <- rf_fit %>% 
-  augment(crime_test) %>% 
+rf_results <- rf_fit |> 
+  augment(crime_test) |> 
   mutate(model = "random forest")
 ```
 For good measure, I'll also include a generalized linear model (glm)
@@ -338,19 +338,19 @@ For good measure, I'll also include a generalized linear model (glm)
 
 ```r
 poisson_model <- 
-  poisson_reg() %>%
-  set_engine("glm") %>%
+  poisson_reg() |>
+  set_engine("glm") |>
   set_mode("regression")
 
-poisson_wflow <- workflow() %>%
-  add_recipe(crime_recipe) %>%
+poisson_wflow <- workflow() |>
+  add_recipe(crime_recipe) |>
   add_model(poisson_model)
 
-poisson_fit <- poisson_wflow %>% 
+poisson_fit <- poisson_wflow |> 
   fit(crime_train)
 
-poisson_fit %>%
-  pull_workflow_fit() %>% 
+poisson_fit |>
+  pull_workflow_fit() |> 
   vip(aesthetics = list(fill = cols[4])) +
   labs(title = "Feature Importance -- glm")
 ```
@@ -358,8 +358,8 @@ poisson_fit %>%
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-14-1.png" width="100%" />
 
 ```r
-poisson_results <- poisson_fit %>% 
-  augment(crime_test) %>% 
+poisson_results <- poisson_fit |> 
+  augment(crime_test) |> 
   mutate(model = "glm")
 ```
 
@@ -368,14 +368,14 @@ The Random Forest and the glm models performed the best here, with the former ed
 
 ```r
 model_results <- 
-  rp_results %>% 
-  bind_rows(ranger_results) %>% 
-  bind_rows(rf_results) %>% 
-  bind_rows(poisson_results) %>% 
-  group_by(model) %>% 
+  rp_results |> 
+  bind_rows(ranger_results) |> 
+  bind_rows(rf_results) |> 
+  bind_rows(poisson_results) |> 
+  group_by(model) |> 
   metrics(truth = number_of_offences, estimate = .pred)
 
-model_results %>% 
+model_results |> 
   ggplot(aes(model, .estimate, fill = model)) +
   geom_col() +
   geom_label(aes(label = round(.estimate, 2)), size = 3, fill = "white") +
@@ -397,10 +397,10 @@ What I could do though is to strengthen my tree-based models above by engineerin
 
 ```r
 temp_df <- 
-  crime_df %>% 
+  crime_df |> 
   mutate(num_lag1 = lag(number_of_offences),
          num_lag2 = lag(number_of_offences, 2),
-         num_lag3 = lag(number_of_offences, 3)) %>% 
+         num_lag3 = lag(number_of_offences, 3)) |> 
   drop_na()
 ```
 
@@ -411,19 +411,19 @@ So, when predicting the number of offences, the model will now additionally cons
 set.seed(123)
 
 data_split <- 
-  temp_df %>%
+  temp_df |>
   initial_split(strata = offences)
 
-temp_train <- data_split %>%
+temp_train <- data_split |>
   training()
 
-temp_test <- data_split %>%
+temp_test <- data_split |>
   testing()
 
 temp_recipe <-
-  temp_train %>%
-  recipe() %>%
-  update_role(number_of_offences, new_role = "outcome") %>%
+  temp_train |>
+  recipe() |>
+  update_role(number_of_offences, new_role = "outcome") |>
   update_role(-has_role("outcome"), new_role = "predictor")
 
 summary(temp_recipe)
@@ -444,19 +444,19 @@ summary(temp_recipe)
 
 ```r
 temp_model <- 
-  rand_forest() %>%
-  set_engine("randomForest", mtry = 2) %>%
+  rand_forest() |>
+  set_engine("randomForest", mtry = 2) |>
   set_mode("regression")
 
-temp_wflow <- workflow() %>%
-  add_recipe(temp_recipe) %>%
+temp_wflow <- workflow() |>
+  add_recipe(temp_recipe) |>
   add_model(temp_model)
 
-temp_fit <- temp_wflow %>% 
+temp_fit <- temp_wflow |> 
   fit(temp_train)
 
-temp_fit %>%
-  pull_workflow_fit() %>% 
+temp_fit |>
+  pull_workflow_fit() |> 
   vip(aesthetics = list(fill = cols[4])) +
   labs(title = "Feature Importance -- Random Forest with Lags")
 ```
@@ -464,9 +464,9 @@ temp_fit %>%
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-17-1.png" width="100%" />
 
 ```r
-temp_results <- temp_fit %>% 
-  augment(temp_test) %>% 
-  metrics(truth = number_of_offences, estimate = .pred) %>% 
+temp_results <- temp_fit |> 
+  augment(temp_test) |> 
+  metrics(truth = number_of_offences, estimate = .pred) |> 
   mutate(model = "rf with lags")
 ```
 
@@ -475,10 +475,10 @@ The recipe summary includes the three new predictors. And the feature importance
 
 ```r
 updated_results <- 
-  model_results %>% 
+  model_results |> 
   bind_rows(temp_results)
 
-updated_results %>% 
+updated_results |> 
   ggplot(aes(model, .estimate, fill = model)) +
   geom_col() +
   geom_label(aes(label = round(.estimate, 2)), size = 3, fill = "white") +
@@ -561,7 +561,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> scales </td>
-   <td style="text-align:left;"> comma[3] </td>
+   <td style="text-align:left;"> cut_short_scale[3];  label_number[3] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> stats </td>

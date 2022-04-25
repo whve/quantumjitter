@@ -7,7 +7,7 @@ categories:
   - R
 tags:
 summary: Exploring colour palettes and small multiples with ggplot2.
-lastmod: '2022-04-10'
+lastmod: '2022-04-25'
 draft: false
 featured: false
 ---
@@ -97,9 +97,9 @@ read_dm <- function(x){
     col_types = NULL)
 }
 
-combined_df <- map(names, read_dm) %>% 
-  set_names(c("gcloud", "dos")) %>% 
-  bind_rows() %>% 
+combined_df <- map(names, read_dm) |> 
+  set_names(c("gcloud", "dos")) |> 
+  bind_rows() |> 
   mutate(framework = if_else(is.na(framework), "DOS", framework))
 ```
 
@@ -107,10 +107,10 @@ I'd like to create some new features: Month-end dates, something to distinguish 
 
 
 ```r
-clean_df <- combined_df %>%
+clean_df <- combined_df |>
   mutate(
-    month_end = date_parse(str_c(month, "01", sep = "-"), format = "%b-%y-%d") %>% 
-      add_months(1) %>% add_days(-1),
+    month_end = date_parse(str_c(month, "01", sep = "-"), format = "%b-%y-%d") |> 
+      add_months(1) |> add_days(-1),
     version = str_remove(framework, fixed("-Cloud ")),
     version = str_replace(version, fixed("G-Cloud"), "G1"),
     version = str_replace(version, fixed("GIII"), "G3"),
@@ -127,10 +127,10 @@ Finding the interval between G-Cloud versions will enable me to calculate and pr
 
 
 ```r
-version_df <- clean_df %>%
-  filter(version != "DOS") %>% 
-  group_by(version) %>%
-  summarise(start = min(month_end)) %>% 
+version_df <- clean_df |>
+  filter(version != "DOS") |> 
+  group_by(version) |>
+  summarise(start = min(month_end)) |> 
   mutate(next_start = lead(start),
          interval = lubridate::interval(start, next_start) %/% months(1))
 ```
@@ -141,19 +141,20 @@ Let's visualise how each of these framework versions grows, matures and fades aw
 
 
 ```r
-vers_summary <- clean_df %>%
-  filter(version != "DOS") %>% 
-  group_by(version, month_end) %>%
+vers_summary <- clean_df |>
+  filter(version != "DOS") |> 
+  group_by(version, month_end) |>
   summarise(sales = sum(spend) / 1000000)
 
-vers_summary %>% 
+vers_summary |> 
   ggplot(aes(month_end, sales, colour = version)) +
   geom_line() +
   geom_smooth(size = 2) +
   scale_x_date(date_breaks = "years", date_labels = "%Y") +
+  scale_y_continuous(labels = label_dollar(prefix = "£", suffix = "m")) +
   scale_colour_manual(values = cols) +
   labs(x = NULL, y = NULL, title = "The Lifecycle of G-Cloud Versions", 
-       subtitle = "Monthly £m Sales by Version") + 
+       subtitle = "Monthly Sales by Version") + 
   labs(caption = "\nSource: GOV.UK's Digital Marketplace")
 ```
 
@@ -163,15 +164,15 @@ vers_summary %>%
 
 
 ```r
-fw_summary <- clean_df %>%
-  group_by(framework, month_end) %>%
+fw_summary <- clean_df |>
+  group_by(framework, month_end) |>
   summarise(pct = sum(SME_spend, na.rm = TRUE) / sum(spend, na.rm = TRUE))
 
-fw_summary %>% 
+fw_summary |> 
   ggplot(aes(month_end, pct, colour = framework)) +
   geom_line() +
   geom_smooth(size = 2) +
-  scale_y_continuous(breaks = c(0.25, 0.5, 0.75, 1), labels = percent_format()) +
+  scale_y_continuous(breaks = c(0.25, 0.5, 0.75, 1), labels = label_percent()) +
   scale_x_date(date_breaks = "years", date_labels = "%Y") +
   scale_colour_manual(values = cols[c(1, 9)]) +
   labs(x = NULL, y = NULL, 
@@ -187,27 +188,28 @@ Overall spending via the combined frameworks however continues to grow across al
 
 ```r
 sect_summary <- 
-  clean_df %>%
+  clean_df |>
   filter(!sector %in% c("Unregistered or Unknown",
                         "Utility (Historic)",
-                        "Wider Public Sector")) %>%
-  group_by(sector, month_end) %>%
+                        "Wider Public Sector")) |>
+  group_by(sector, month_end) |>
   summarise(
   sales = sum(spend) / 1000000,
   pct = sum(SME_spend, na.rm = TRUE) / sum(spend, na.rm = TRUE)
   )
 
-sect_summary %>% 
+sect_summary |> 
   ggplot(aes(month_end, sales, colour = sector)) +
   geom_line() +
   geom_smooth(size = 2) +
   facet_wrap(~ sector, scales = "free_y") +
   theme(legend.position = "none") +
   scale_x_date(date_breaks = "years", date_labels = "%Y") +
+  scale_y_continuous(labels = label_dollar(prefix = "£", suffix = "m")) +
   scale_colour_manual(values = cols) +
   labs(x = NULL, y = NULL, 
        title = "All Sectors Increase Digital Marketplace Spend", 
-       subtitle = "£m G-Cloud & DOS Spend by Sector") + 
+       subtitle = "G-Cloud & DOS Spend by Sector") + 
   labs(caption = "\nSource: GOV.UK's Digital Marketplace")
 ```
 
@@ -217,17 +219,18 @@ The decline in the proportion of spend via SMEs is also fairly broad-based.
 
 
 ```r
-sect_summary %>% 
+sect_summary |> 
   ggplot(aes(month_end, pct, colour = sector)) +
   geom_line() +
   geom_smooth(size = 2) +
   facet_wrap(~ sector, scales = "free_y") +
   theme(legend.position = "none") +
   scale_x_date(date_breaks = "years", date_labels = "%Y") +
+  scale_y_continuous(labels = label_percent()) +
   scale_colour_manual(values = cols) +
   labs(x = NULL, y = NULL, 
        title = "Most Sectors Spend Proportionately Less on SMEs", 
-       subtitle = "% SME G-Cloud & DOS Spend by Sector") + 
+       subtitle = "Pct SME G-Cloud & DOS Spend by Sector") + 
   labs(caption = "\nSource: GOV.UK's Digital Marketplace")
 ```
 
@@ -259,7 +262,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> ggplot2 </td>
-   <td style="text-align:left;"> aes[4];  facet_wrap[2];  geom_line[4];  geom_smooth[4];  ggplot[4];  labs[8];  scale_colour_manual[4];  scale_x_date[4];  scale_y_continuous[1];  theme[2];  theme_bw[1];  theme_set[1] </td>
+   <td style="text-align:left;"> aes[4];  facet_wrap[2];  geom_line[4];  geom_smooth[4];  ggplot[4];  labs[8];  scale_colour_manual[4];  scale_x_date[4];  scale_y_continuous[4];  theme[2];  theme_bw[1];  theme_set[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> kableExtra </td>
@@ -275,7 +278,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> scales </td>
-   <td style="text-align:left;"> percent_format[1] </td>
+   <td style="text-align:left;"> label_dollar[2];  label_percent[2] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> stats </td>

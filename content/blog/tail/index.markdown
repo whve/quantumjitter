@@ -52,8 +52,7 @@ The left plot shows the raw components without blending. The right plot is only 
 ```r
 p0 <- tibble(outcome = rnorm(10000, 20, 2)) |>
   ggplot(aes(outcome)) +
-  scale_y_continuous(labels = label_percent()) +
-  labs(title = "Without Blending", x = "Outcome")
+  scale_y_continuous(labels = label_percent())
 
 p1 <- p0 +
   geom_density(adjust = 2, fill = cols[3]) +
@@ -61,7 +60,7 @@ p1 <- p0 +
     xmin = 15, xmax = 18, ymin = -Inf, ymax = Inf,
     fill = cols[2]
   ) + 
-  labs(y = "Density")
+  labs(title = "Without Blending", y = "Density")
 
 p2 <- p0 +
   as_reference(geom_density(adjust = 2, fill = cols[3]), id = "density") +
@@ -69,7 +68,7 @@ p2 <- p0 +
     xmin = 15, xmax = 18, ymin = -Inf, ymax = Inf,
     fill = cols[2]
   ), bg_layer = "density", blend_type = "atop") + 
-  labs(y = NULL)
+  labs(title = "With Blending", y = NULL)
 
 p1 + p2
 ```
@@ -98,7 +97,7 @@ p0 <- tq_get(tickrs, get = "stock.prices", from = "2022-01-01") |>
     label = "Helpful\nAnnotation", colour = "black"
   ) +
   scale_y_continuous(limits = c(0, NA)) +
-  labs(title = "Without Blending", x = NULL)
+  labs(x = NULL)
 
 p1 <- p0 +
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = cols[1]) +
@@ -107,7 +106,7 @@ p1 <- p0 +
     xmin = as.Date("2022-03-01"), xmax = as.Date("2022-03-31"),
     ymin = -Inf, ymax = Inf, fill = cols[4], colour = "black", linetype = "dashed"
   ) + 
-  labs(y = "Closing Price")
+  labs(title = "Without Blending", y = "Closing Price")
 
 p2 <- p0 +
   as_reference(geom_ribbon(aes(ymin = lower, ymax = upper), fill = cols[1]), id = "ribbon") +
@@ -120,7 +119,7 @@ p2 <- p0 +
     bg_layer = "ribbon", blend_type = "atop"
     ) +
   geom_line(colour = cols[3]) + 
-  labs(y = NULL)
+  labs(title = "With Blending", y = NULL)
 
 p1 + p2 +
   plot_annotation(title = "Median Price Bounded by Upper & Lower Quartiles")

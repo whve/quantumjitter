@@ -33,7 +33,6 @@ params:
   custom_theme: 
   customheadingFontFamily: Metropolis
   customtextFontFamily: Bitter
-  ShowFullTextinRSS: true
   description: A blogdown-powered and Hugo Apero themed Data Science & Machine Learning blog.
   favicon: /img/favicon.png
   headingFontFamily: sans-serif

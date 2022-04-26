@@ -1,7 +1,7 @@
 ---
 title: Painting Tails
 author: Carl Goodwin
-date: '2022-04-25'
+date: '2022-04-26'
 slug: tail
 categories:
   - R
@@ -9,7 +9,7 @@ tags:
   - special effects
 summary: "If you're a cat, go find the nearest open pot of paint. No need to read further. But if you're a data scientist, what to do?"
 lastmod: '2022-04-26'
-draft: true
+draft: false
 featured: false
 ---
 

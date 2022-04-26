@@ -128,4 +128,4 @@ p1 + p2 +
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="100%" />
 
-It would be interesting to here about other uses of [ggfx](https://ggfx.data-imaginist.com) beyond the purely artistic.
+It would be interesting to hear about other uses of [ggfx](https://ggfx.data-imaginist.com) beyond the purely artistic.

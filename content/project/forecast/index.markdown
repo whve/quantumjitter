@@ -9,7 +9,7 @@ tags:
   - time series
   - forecast
 summary: Humans have the magical ability to plan for future events. But it's not quite a uniquely human trait as ravens can match a four-year-old.
-lastmod: '2022-04-10'
+lastmod: '2022-04-28'
 draft: false
 featured: false
 ---
@@ -26,9 +26,9 @@ featured: false
 
 
 
-Humans have the magical ability to plan for future events, for future gain. It’s [not quite a uniquely human trait](https://www.newscientist.com/article/2140668-ravens-can-plan-for-future-as-well-as-4-year-old-children-can/). Because apparently ravens can match a four-year-old.
-
 ![](/project/forecast/featured.jpeg)
+
+Humans have the magical ability to plan for future events, for future gain. It’s [not quite a uniquely human trait](https://www.newscientist.com/article/2140668-ravens-can-plan-for-future-as-well-as-4-year-old-children-can/). Because apparently ravens can match a four-year-old.
 
 An abundance of data, and some very nice R packages, make our ability to plan all the more powerful.
 
@@ -112,9 +112,9 @@ read_dm <- function(x){
     col_types = NULL)
 }
 
-raw <- map(names, read_dm) %>% 
-  set_names(c("gcloud", "dos")) %>% 
-  bind_rows() %>% 
+raw <- map(names, read_dm) |> 
+  set_names(c("gcloud", "dos")) |> 
+  bind_rows() |> 
   mutate(framework = if_else(is.na(framework), "DOS", framework))
 ```
 
@@ -124,10 +124,10 @@ The lot structure for *G-Cloud* has evolved over time, but fortunately, there is
 
 
 ```r
-both <- raw %>%
+both <- raw |>
   mutate(
-    month_end = date_parse(str_c(date, "01", sep = "-"), format = "%b-%y-%d") %>% 
-      add_months(1) %>% add_days(-1),
+    month_end = date_parse(str_c(date, "01", sep = "-"), format = "%b-%y-%d") |> 
+      add_months(1) |> add_days(-1),
     date = yearmonth(month_end),
     framework = str_extract(framework, ".{3,7}"),
     spend = str_remove(spend, coll("£")),
@@ -151,15 +151,15 @@ The tsibble package combined with the newer fable and feasts packages, make this
 
 
 ```r
-both_ts <- both %>%
-  group_by(date, framework) %>% 
-  summarise(spend = sum(spend)) %>% 
+both_ts <- both |>
+  group_by(date, framework) |> 
+  summarise(spend = sum(spend)) |> 
   as_tsibble(key = framework, index = date)
 
-both_ts %>% 
+both_ts |> 
   ggplot(aes(date, spend, colour = framework)) +
   geom_line(key_glyph = "timeseries") +
-  scale_y_continuous(labels = dollar_format(prefix = "£", suffix = "m")) +
+  scale_y_continuous(labels = label_dollar(prefix = "£", suffix = "m")) +
   scale_colour_manual(values = cols[c(3, 4)]) +
   labs(x = NULL, y = NULL, title = "Monthly Digital Marketplace Sales")
 ```
@@ -174,9 +174,9 @@ By decomposing the historical data we can tease out the underlying trend and sea
 
 
 ```r
-both_ts %>%
-  model(stl = STL(spend ~ trend(window = 7) + season(window = "periodic"))) %>%
-  components() %>%
+both_ts |>
+  model(stl = STL(spend ~ trend(window = 7) + season(window = "periodic"))) |>
+  components() |>
   autoplot() +
   scale_colour_manual(values = cols[c(3, 4)]) +
   labs(x = NULL, title = "Timeseries Decomposition")
@@ -194,12 +194,12 @@ Use of `autoplot` would simplify the code, but personally I like to expose all t
 
 
 ```r
-mod_ts <- both_ts %>%
+mod_ts <- both_ts |>
   model(ARIMA = ARIMA(spend, stepwise = TRUE, approximation = FALSE))
 
-mod_ts %>% 
-  glance() %>%
-  select(-ar_roots, -ma_roots) %>% 
+mod_ts |> 
+  glance() |>
+  select(-ar_roots, -ma_roots) |> 
   kbl()
 ```
 
@@ -238,8 +238,8 @@ mod_ts %>%
 </table>
 
 ```r
-mod_ts %>% 
-  tidy() %>%
+mod_ts |> 
+  tidy() |>
   kbl()
 ```
 
@@ -305,14 +305,14 @@ mod_ts %>%
 </table>
 
 ```r
-fcast_ts <- mod_ts %>%
-  forecast(h = "2 years") %>% 
-  mutate(`95%` = hilo(spend, 95), `80%` = hilo(spend, 80)) %>% 
-  unpack_hilo(c("95%", "80%")) %>%
-  rename(fc_spend = spend) %>% 
+fcast_ts <- mod_ts |>
+  forecast(h = "2 years") |> 
+  mutate(`95%` = hilo(spend, 95), `80%` = hilo(spend, 80)) |> 
+  unpack_hilo(c("95%", "80%")) |>
+  rename(fc_spend = spend) |> 
   bind_rows(both_ts)
 
-fcast_ts %>%
+fcast_ts |>
   ggplot(aes(date, fill = framework)) +
   geom_line(aes(y = spend), colour = cols[5]) +
   geom_ribbon(aes(ymin = `95%_lower`, ymax = `95%_upper`),
@@ -322,10 +322,11 @@ fcast_ts %>%
     fill = cols[2], colour = NA
   ) +
   geom_line(aes(y = .mean), colour = "white") +
+  scale_y_continuous(labels = label_dollar(prefix = "£", suffix = "m")) +
   facet_wrap(~framework) +
   labs(
     title = "Digital Marketplace Sales Forecast by Framework",
-    x = NULL, y = "Spend $m",
+    x = NULL, y = "Spend",
     subtitle = "80 & 95% Prediction Intervals"
   ) +
   theme(
@@ -344,18 +345,18 @@ An alternative option is hierarchical time-series forecasting which models botto
 
 
 ```r
-gcloud_ts <- both %>%
-  filter(framework == "G-Cloud") %>% 
-  group_by(date, lot) %>% 
-  summarise(spend = sum(spend)) %>% 
+gcloud_ts <- both |>
+  filter(framework == "G-Cloud") |> 
+  group_by(date, lot) |> 
+  summarise(spend = sum(spend)) |> 
   as_tsibble(key = lot, index = date)
 
-gc_ts <- gcloud_ts %>%
+gc_ts <- gcloud_ts |>
   model(ARIMA = ARIMA(spend, stepwise = TRUE, approximation = FALSE))
 
-gc_ts %>% 
-  glance() %>%
-  select(-ar_roots, -ma_roots) %>% 
+gc_ts |> 
+  glance() |>
+  select(-ar_roots, -ma_roots) |> 
   kbl()
 ```
 
@@ -403,8 +404,8 @@ gc_ts %>%
 </table>
 
 ```r
-gc_ts %>% 
-  tidy() %>%
+gc_ts |> 
+  tidy() |>
   kbl()
 ```
 
@@ -497,14 +498,14 @@ gc_ts %>%
 </table>
 
 ```r
-fcgc_ts <- gc_ts %>%
-  forecast(h = "2 years") %>% 
-  mutate(`95%` = hilo(spend, 95), `80%` = hilo(spend, 80)) %>% 
-  unpack_hilo(c("95%", "80%")) %>% 
-  rename(fc_spend = spend) %>% 
+fcgc_ts <- gc_ts |>
+  forecast(h = "2 years") |> 
+  mutate(`95%` = hilo(spend, 95), `80%` = hilo(spend, 80)) |> 
+  unpack_hilo(c("95%", "80%")) |> 
+  rename(fc_spend = spend) |> 
   bind_rows(gcloud_ts)
 
-fcgc_ts %>%
+fcgc_ts |>
   ggplot(aes(date, fill = lot)) +
   geom_line(aes(y = spend), colour = cols[5]) +
   geom_ribbon(aes(ymin = `95%_lower`, ymax = `95%_upper`),
@@ -514,10 +515,11 @@ fcgc_ts %>%
     fill = cols[2], colour = NA
   ) +
   geom_line(aes(y = .mean), colour = "white") +
+  scale_y_continuous(labels = label_dollar(prefix = "£", suffix = "m")) +
   facet_wrap(~lot) +
   labs(
     title = "G-Cloud Sales Forecast by Lot",
-    x = NULL, y = "Spend $m",
+    x = NULL, y = "Spend",
     subtitle = "80 & 95% Prediction Intervals"
   ) +
   theme(
@@ -568,7 +570,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> ggplot2 </td>
-   <td style="text-align:left;"> aes[11];  geom_line[5];  geom_ribbon[4];  labs[4];  ggplot[3];  element_text[2];  facet_wrap[2];  scale_colour_manual[2];  theme[2];  autoplot[1];  scale_y_continuous[1];  theme_bw[1];  theme_set[1] </td>
+   <td style="text-align:left;"> aes[11];  geom_line[5];  geom_ribbon[4];  labs[4];  ggplot[3];  scale_y_continuous[3];  element_text[2];  facet_wrap[2];  scale_colour_manual[2];  theme[2];  autoplot[1];  theme_bw[1];  theme_set[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> kableExtra </td>
@@ -584,7 +586,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> scales </td>
-   <td style="text-align:left;"> dollar_format[1] </td>
+   <td style="text-align:left;"> label_dollar[3] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> stringr </td>

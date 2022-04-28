@@ -8,16 +8,16 @@ categories:
 tags:
   - web site
 summary: A couple of years ago I [moved house](/blog/plunge) from Wordpress to [Blogdown](https://bookdown.org/yihui/blogdown/). It's a less stressful life and I plan to stay. [Hugo Academic](https://academic-demo.netlify.app) served me well, but sometimes you just need a fresh coat of paint.
-lastmod: '2022-04-10'
+lastmod: '2022-04-28'
 draft: false
 featured: false
 ---
 
+![](/blog/renovate/featured.GIF)
+
 ## Motivation
 
 A couple of years ago I [moved house](/blog/plunge) from Wordpress to [Blogdown](https://bookdown.org/yihui/blogdown/). It's proved to be a much less stressful life and I plan to stay. [Hugo Academic](https://academic-demo.netlify.app) served me well, but sometimes you just need a fresh coat of paint. I liked the look of [Hugo Apéro](https://hugo-apero-docs.netlify.app).
-
-![](/blog/renovate/featured.GIF)
 
 Apéro feels simpler and has an elegant design with well-chosen themes and fonts.
 
@@ -41,8 +41,11 @@ Given the taxonomy differences, I created a `static/_redirects` file so that boo
 
 
 ```
-## /category/*  /categories/:splat
-## /tag/*       /tags/:splat
+## /category/*                         /categories/:splat
+## /tag/*                              /tags/:splat
+## /post/*                             /blog/:splat
+## /project/goldilocks/featured.jpeg   /project/goldilocks/featured.GIF
+## /project/zbox/*                     /project/box/:splat
 ```
 
 I had customised my Academic site to show the *updated*, as well as *posted*, date for each project and post. So to get the same in Apéro, I copied the `themes > hugo-apero > layouts > partials > shared > post-details.html` file to `layouts > partials > shared > post-details.html`, duplicated lines 2-5 below and changed `.PublishDate` to `.Lastmod`. As my YAML header for all projects and posts already included `lastmod:`, the *details* twistie at the foot of each project (and post) now shows both dates.
@@ -93,12 +96,11 @@ And because I wanted to deploy a *pre-existing* RStudio project to Github, rathe
 
 I played around a bit with the `.gitignore` file and found I could exclude quite a lot of stuff that Netlify would not need to do the Hugo build.
 
-Regarding API keys, I had previously used a hidden code-chunk in Rmarkdown. It felt like time to be a little more rigorous and use the [keyring package](https://github.com/r-lib/keyring) for storing these.
-
 The Netlify deployment via Github did initially fail with a "Base directory does not exist" message. The fix there was to leave the base directory in Netlify's build settings blank rather than using the repo URL (which it already had under current repository).
-
 
 ![](/blog/renovate/netlify.png)
 
 Then finally I could flip my *live* site over to continuous deployment, pack away my paint pots, paint roller and step ladder, put my feet up in front of a roaring fire and bask in the warmth of my newly-renovated blogdown home.
+
+Post-deployment there was initially an issue with the RSS feed showing only the summary. Adding a `layouts/_default/rss.xml` file using the [Hugo default](https://github.com/gohugoio/hugo/blob/master/tpl/tplimpl/embedded/templates/_default/rss.xml) with `.Summary` changed to `.Content` fixed that.
 

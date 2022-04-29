@@ -9,7 +9,7 @@ tags:
   - dimensionality reduction
   - animation
 summary: Animated dimensionality reduction and whether East and West are drifting closer or farther apart based on historical UN voting patterns.
-lastmod: '2022-04-10'
+lastmod: '2022-04-29'
 draft: false
 featured: false
 ---
@@ -18,9 +18,9 @@ featured: false
 
 
 
-In [Finding Happiness in 'The Smoke'](/project/happiness), dimensionality reduction and cluster analysis are used to see how different characteristics group London boroughs.
-
 ![](/project/un/featured.GIF)
+
+In [Finding Happiness in 'The Smoke'](/project/happiness), dimensionality reduction and cluster analysis are used to see how different characteristics group London boroughs.
 
 Dimensionality reduction is used here to visualise the grouping of UN members, for example [five of the founding members](https://research.un.org/en/unmembers/founders), based on their [General Assembly](http://www.un.org/en/ga/) voting patterns. And by using animation, it's possible to more easily see changes over time.
 
@@ -50,9 +50,9 @@ theme_set(theme_bw())
 
 
 ```r
-raw_df <- un_votes %>%
-  inner_join(un_roll_calls, by = "rcid") %>%
-  filter(country_code %in% c("GB", "CN", "US", "FR", "RU")) %>%
+raw_df <- un_votes |>
+  inner_join(un_roll_calls, by = "rcid") |>
+  filter(country_code %in% c("GB", "CN", "US", "FR", "RU")) |>
   mutate(
     country = recode(
       country_code,
@@ -64,12 +64,12 @@ raw_df <- un_votes %>%
     date = date_parse(as.character(date), format = "%Y-%m-%d")
   )
 
-from <- raw_df %>%
-  summarise(min(get_year(date))) %>%
+from <- raw_df |>
+  summarise(min(get_year(date))) |>
   pull()
 
-to <- raw_df %>%
-  summarise(max(get_year(date))) %>%
+to <- raw_df |>
+  summarise(max(get_year(date))) |>
   pull()
 ```
 
@@ -77,26 +77,26 @@ Applying a sliding window to the roll-calls from 1946 to 2019 will make it possi
 
 
 ```r
-tidy_df <- raw_df %>%
-  arrange(date, rcid) %>%
-  nest(-c(date, rcid)) %>%
-  mutate(vote_id = row_number(), year = get_year(date)) %>%
-  unnest(data) %>%
-  complete(country, nesting(vote_id)) %>%
-  mutate(vote = replace_na(as.character(vote), "na"), value = 1) %>%
-  group_by(vote_id) %>%
-  fill(year, .direction = "updown") %>%
-  mutate(variation = n_distinct(vote)) %>%
-  ungroup() %>%
-  filter(variation != 1) %>%
+tidy_df <- raw_df |>
+  arrange(date, rcid) |>
+  nest(-c(date, rcid)) |>
+  mutate(vote_id = row_number(), year = get_year(date)) |>
+  unnest(data) |>
+  complete(country, nesting(vote_id)) |>
+  mutate(vote = replace_na(as.character(vote), "na"), value = 1) |>
+  group_by(vote_id) |>
+  fill(year, .direction = "updown") |>
+  mutate(variation = n_distinct(vote)) |>
+  ungroup() |>
+  filter(variation != 1) |>
   select(country, vote_id, year, vote, value)
 
-wdow_df <- tidy_df %>%
-  as_tsibble(key = country, index = vote_id) %>%
-  nest(-vote_id) %>%
-  slide_tsibble(.size = 1000, .step = 250, .id = "slide_id") %>%
-  unnest(data) %>%
-  as_tibble() %>%
+wdow_df <- tidy_df |>
+  as_tsibble(key = country, index = vote_id) |>
+  nest(-vote_id) |>
+  slide_tsibble(.size = 1000, .step = 250, .id = "slide_id") |>
+  unnest(data) |>
+  as_tibble() |>
   arrange(slide_id, vote_id, country)
 ```
 
@@ -104,13 +104,13 @@ Dimensionality reduction may be performed on each window. And the voting pattern
 
 
 ```r
-wdows <- wdow_df %>%
-  summarise(max(slide_id)) %>%
+wdows <- wdow_df |>
+  summarise(max(slide_id)) |>
   pull()
 
 slide_pca <- function(x) {
-  wide_df <- wdow_df %>%
-    filter(slide_id == x) %>%
+  wide_df <- wdow_df |>
+    filter(slide_id == x) |>
     pivot_wider(
       id_cols = c(country, slide_id),
       names_from = c(vote_id, vote),
@@ -118,18 +118,18 @@ slide_pca <- function(x) {
       values_fill = 0
     )
 
-  pca_fit <- wide_df %>%
-    select(-c(country, slide_id)) %>%
-    prcomp(scale = TRUE) %>%
-    augment(wide_df) %>%
+  pca_fit <- wide_df |>
+    select(-c(country, slide_id)) |>
+    prcomp(scale = TRUE) |>
+    augment(wide_df) |>
     select(slide_id, country, .fittedPC1, .fittedPC2)
 }
 
 pca_windows <- map_dfr(1:wdows, slide_pca)
 
-p <- pca_windows %>%
+p <- pca_windows |>
   mutate(east_west = if_else(country %in% c("China", "Russia"), 
-                             "East", "West")) %>%
+                             "East", "West")) |>
   ggplot(aes(.fittedPC1, .fittedPC2)) +
   geom_label(aes(label = country, fill = east_west)) +
   scale_fill_manual(values = cols[c(1, 3)]) +
@@ -157,17 +157,17 @@ The UN's [Security Council Veto List](http://research.un.org/en/docs/sc/quick/ve
 ```r
 url <- "https://www.un.org/depts/dhl/resguide/scact_veto_table_en.htm"
 
-meeting_df <- url %>%
-  read_html() %>%
-  html_element(".tablefont") %>%
-  html_table(fill = TRUE) %>%
-  select(date = 1, draft = 2, meeting = 3, agenda = 4, vetoed_by = 5) %>%
+meeting_df <- url |>
+  read_html() |>
+  html_element(".tablefont") |>
+  html_table(fill = TRUE) |>
+  select(date = 1, draft = 2, meeting = 3, agenda = 4, vetoed_by = 5) |>
   slice(-c(1:2))
 ```
 
 
 ```r
-meeting_df2 <- meeting_df %>%
+meeting_df2 <- meeting_df |>
   mutate(
     date = str_remove(date, "-(?:\\d{2}|\\d)"),
     date = date_parse(date, format = "%d %B %Y"),
@@ -178,12 +178,12 @@ meeting_df2 <- meeting_df %>%
     France = if_else(str_detect(vetoed_by, "France"), 1, 0),
     US = if_else(str_detect(vetoed_by, "US"), 1, 0),
     UK = if_else(str_detect(vetoed_by, "UK"), 1, 0)
-  ) %>%
-  pivot_longer(c(Russia:UK), names_to = "country", values_to = "veto") %>%
+  ) |>
+  pivot_longer(c(Russia:UK), names_to = "country", values_to = "veto") |>
   filter(veto == 1)
 
-country_df <- meeting_df2 %>%
-  count(country) %>%
+country_df <- meeting_df2 |>
+  count(country) |>
   mutate(country = fct_reorder(country, n))
 ```
 
@@ -191,7 +191,7 @@ country_df <- meeting_df2 %>%
 ```r
 cols2 <- wes_palette(5, name = "GrandBudapest2", type = "continuous")
 
-little_plot <- country_df %>%
+little_plot <- country_df |>
   ggplot(aes(country, n, fill = country)) +
   geom_col() +
   coord_flip() +
@@ -202,13 +202,13 @@ little_plot <- country_df %>%
     caption = "Source: research.un.org"
   )
 
-year_df <- meeting_df2 %>%
-  mutate(year = get_year(date)) %>%
+year_df <- meeting_df2 |>
+  mutate(year = get_year(date)) |>
   count(year, country)
 
 to_date <- format(max(meeting_df2$date), "%b %d, %y")
 
-big_plot <- year_df %>%
+big_plot <- year_df |>
   ggplot(aes(year, n, fill = country)) +
   geom_col(show.legend = FALSE) +
   scale_fill_manual(values = cols2[c(1:5)]) +

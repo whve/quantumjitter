@@ -9,7 +9,7 @@ tags:
   - quant
   - statistics
 summary: The [Goldilocks principle](https://en.wikipedia.org/wiki/Goldilocks_principle) has its origins in a story about a girl who tastes bowls of porridge left by three bears. When investing in stocks, how many might be 'just right'?
-lastmod: '2022-04-10'
+lastmod: '2022-04-29'
 draft: false
 featured: false
 ---
@@ -18,9 +18,9 @@ featured: false
 
 
 
-[The Goldilocks principle](https://en.wikipedia.org/wiki/Goldilocks_principle) has its origins in a children's story about a girl who tastes the bowls of porridge left by three bears. She prefers the one that is neither too hot nor too cold, but is just right.
-
 ![](/project/goldilocks/featured.GIF)
+
+[The Goldilocks principle](https://en.wikipedia.org/wiki/Goldilocks_principle) has its origins in a children's story about a girl who tastes the bowls of porridge left by three bears. She prefers the one that is neither too hot nor too cold, but is just right.
 
 When it comes to investing in stocks, how many is "just right"?
 
@@ -68,10 +68,10 @@ Here's the resultant distribution I'll use to assess the impact of portfolio siz
 
 
 ```r
-stock_data %>% 
+stock_data |> 
   ggplot(aes(return)) +
   geom_histogram(fill = cols[2]) +
-  scale_x_continuous(labels = percent_format()) +
+  scale_x_continuous(labels = label_percent()) +
   labs(title = "50 Randomly-generated Stock Returns", 
        x = "Annual Return", y = "Count")
 ```
@@ -83,12 +83,12 @@ Now suppose you share 2 stocks, selected at random, with 1,000 of your social ne
 
 ```r
 portfolio <- function(x) {
-  stock_data %>%
-    slice_sample(n = x, replace = TRUE) %>%
+  stock_data |>
+    slice_sample(n = x, replace = TRUE) |>
     summarise(
       portfolio_return = mean(return),
       portfolio_size = x
-    ) %>%
+    ) |>
     bind_rows()
 }
 
@@ -101,18 +101,18 @@ portfolios <-
     rep(10, 1000),
     rep(20, 1000),
     rep(50, 1000)
-  ), portfolio) %>%
+  ), portfolio) |>
   mutate(portfolio_size = factor(portfolio_size))
 
-mean_returns <- portfolios %>%
-  group_by(portfolio_size) %>%
+mean_returns <- portfolios |>
+  group_by(portfolio_size) |>
   summarise(
     mean_return = mean(portfolio_return),
     min_return = min(portfolio_return)
-  ) %>%
+  ) |>
   ungroup()
 
-portfolios %>%
+portfolios |>
   ggplot(aes(portfolio_size, portfolio_return, group = portfolio_size)) +
   geom_violin(aes(fill = portfolio_size), show.legend = FALSE) +
   geom_label(aes(portfolio_size, 1.5,
@@ -125,7 +125,7 @@ portfolios %>%
   ),
   data = mean_returns, fill = cols[1],
   ) +
-  scale_y_continuous(labels = percent_format(), breaks = breaks_extended(9)) +
+  scale_y_continuous(labels = label_percent(), breaks = breaks_extended(9)) +
   scale_fill_manual(values = cols[c(1:5)]) +
   labs(
     x = "Portfolio Size", y = "Return",
@@ -184,7 +184,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> scales </td>
-   <td style="text-align:left;"> breaks_extended[1];  percent[2];  percent_format[2] </td>
+   <td style="text-align:left;"> breaks_extended[1];  label_percent[2];  percent[2] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> stringr </td>

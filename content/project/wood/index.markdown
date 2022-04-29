@@ -8,7 +8,7 @@ categories:
 tags:
   - apps
 summary: There comes a point where the sheer volume of small multiples one wants to visualise requires a different strategy.
-lastmod: '2022-04-10'
+lastmod: '2022-04-29'
 draft: false
 featured: false
 ---
@@ -20,9 +20,9 @@ featured: false
 
 
 
-In [Criminal Goings-on](/project/forest) faceting offered a way to get a sense of the data. This is a great visualisation tool building on the principle of small multiples. There may come a point though where the sheer volume of small multiples make it harder to "see the wood for the trees". What's an alternative strategy?
-
 ![](/project/wood/featured.jpeg)
+
+In [Criminal Goings-on](/project/forest) faceting offered a way to get a sense of the data. This is a great visualisation tool building on the principle of small multiples. There may come a point though where the sheer volume of small multiples make it harder to "see the wood for the trees". What's an alternative strategy?
 
 
 ```r
@@ -40,10 +40,10 @@ This time I'll use a custom palette to align with the 5-colour Adobe Fresco pale
 ```r
 theme_set(theme_bw())
 
-cols <- c("#2A3C5C", "#B9C1B8", "#EEDEC1", "#41638E", "#606268") %>%
+cols <- c("#2A3C5C", "#B9C1B8", "#EEDEC1", "#41638E", "#606268") |>
   fct_inorder()
 
-tibble(x = 1:5, y = 1) %>%
+tibble(x = 1:5, y = 1) |>
   ggplot(aes(x, y, fill = cols)) +
   geom_col() +
   geom_label(aes(label = cols), size = 4, vjust = 2, fill = "white") +
@@ -78,14 +78,14 @@ url <- str_c(
 )
 
 crime_df <-
-  read_csv(url, col_types = "cfcfdn") %>%
-  clean_names() %>%
+  read_csv(url, col_types = "cfcfdn") |>
+  clean_names() |>
   mutate(
     year = str_extract(year, "(?:1999|200[0-9]|201[0-7])"),
     year = as.numeric(year)
-  ) %>%
-  group_by(year, borough, offences) %>%
-  summarise(number_of_offences = sum(number_of_offences)) %>%
+  ) |>
+  group_by(year, borough, offences) |>
+  summarise(number_of_offences = sum(number_of_offences)) |>
   filter(
     offences != "All recorded offences",
     !borough %in% c(
@@ -101,8 +101,8 @@ This was the original visualisation in [Criminal Goings-on](/project/forest) usi
 
 
 ```r
-crime_df %>%
-  mutate(borough = str_wrap(borough, 11)) %>%
+crime_df |>
+  mutate(borough = str_wrap(borough, 11)) |>
   ggplot(aes(year, number_of_offences, colour = offences, group = offences)) +
   geom_line() +
   facet_wrap(~borough, scales = "free_y", ncol = 4) +
@@ -133,17 +133,17 @@ slope <- function(x, y) {
   coef(lm(y ~ x))[2]
 }
 
-plot_data <- crime_df %>%
-  group_by(borough, offences) %>%
-  nest() %>%
-  ungroup() %>%
+plot_data <- crime_df |>
+  group_by(borough, offences) |>
+  nest() |>
+  ungroup() |>
   mutate(
     additional_cogs = map_cog(
       data,
       ~ tibble(
         slope = cog(slope(.x$year, .x$number_of_offences),
           desc = "Steepness of the trend"
-        ) %>%
+        ) |>
           round(2),
         mean_count = cog(mean(.x$number_of_offences),
           desc = "Average count"
@@ -155,13 +155,13 @@ plot_data <- crime_df %>%
     ),
     panel = map_plot(
       data,
-      ~ figure(xlab = "Date", ylab = "Count") %>%
-        ly_lines(year, number_of_offences, color = cols[5], width = 2, data = .x) %>%
+      ~ figure(xlab = "Date", ylab = "Count") |>
+        ly_lines(year, number_of_offences, color = cols[5], width = 2, data = .x) |>
         ly_points(year, number_of_offences,
           size = 10,
           fill_color = cols[9],
           hover = number_of_offences, data = .x
-        ) %>%
+        ) |>
         theme_plot(
           background_fill_color = cols[2],
           background_fill_alpha = 0.5

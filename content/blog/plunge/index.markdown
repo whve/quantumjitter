@@ -7,16 +7,15 @@ categories:
   - R
 tags:
   - web site
-excerpt: After reading up on [Blogdown](https://bookdown.org/yihui/blogdown/), I decided to take the plunge and leave Wordpress for a quieter life in Blogdown. The motivation?
-authors: []
-lastmod: '2022-04-26'
+summary: After reading up on [Blogdown](https://bookdown.org/yihui/blogdown/), I decided to take the plunge and leave Wordpress for a quieter life in Blogdown. The motivation?
+lastmod: '2022-04-30'
 draft: false
 featured: false
 ---
 
-After reading up on [Blogdown](https://bookdown.org/yihui/blogdown/), I decided to take the plunge and leave Wordpress for a quieter life in Blogdown. 
-
 ![](/blog/plunge/featured.GIF)
+
+After reading up on [Blogdown](https://bookdown.org/yihui/blogdown/), I decided to take the plunge and leave Wordpress for a quieter life in Blogdown. 
 
 ## Motivation
 

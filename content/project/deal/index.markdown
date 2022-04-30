@@ -10,7 +10,7 @@ tags:
   - word embeddings
   - natural language processing
 summary: Before the post-Brexit trade negotiations concluded, what did quantitative textual analysis and word embeddings tell us about the shifting trade-talk sentiment?
-lastmod: '2022-04-11'
+lastmod: '2022-04-30'
 draft: false
 featured: false
 ---
@@ -27,9 +27,9 @@ featured: false
 
 
 
-Reading news articles on the will-they-won't-they post-Brexit trade negotiations with the EU sees days of optimism jarred by days of gloom. Do negative news articles, when one wants a positive outcome, leave a deeper impression?
-
 ![](/project/deal/featured.GIF)
+
+Reading news articles on the will-they-won't-they post-Brexit trade negotiations with the EU sees days of optimism jarred by days of gloom. Do negative news articles, when one wants a positive outcome, leave a deeper impression?
 
 Is it possible to get a more objective view from [quantitative analysis of textual data](https://quanteda.io)? To do this, I'm going to look at hundreds of articles published in the Guardian newspaper over the course of the year to see how trade-talk sentiment changed week-to-week.
 
@@ -67,10 +67,10 @@ The Guardian newspaper asks for requests to span no more than 1 month at a time.
 
 
 ```r
-dates_df <- tibble(start_date = date_build(2020, 1:11, 25)) %>% 
-  mutate(end_date = add_months(start_date, 1) %>% add_days(-1))
+dates_df <- tibble(start_date = date_build(2020, 1:11, 25)) |> 
+  mutate(end_date = add_months(start_date, 1) |> add_days(-1))
 
-dates_df %>%
+dates_df |>
   kbl()
 ```
 
@@ -138,8 +138,7 @@ tic()
 read_slowly <- slowly(gu_content)
 
 article_df <-
-  dates_df %>%
-  pmap_dfr(., function(start_date, end_date) {
+  pmap_dfr(dates_df, function(start_date, end_date) {
     read_slowly(
       "brexit",
       from_date = start_date,
@@ -155,11 +154,11 @@ The data need a little cleaning, for example, to remove multi-topic articles, ht
 
 ```r
 trade_df <-
-  article_df %>%
+  article_df |>
   filter(!str_detect(id, "/live/"), 
-         section_id %in% c("world", "politics", "business")) %>%
+         section_id %in% c("world", "politics", "business")) |>
   mutate(
-    body = str_remove_all(body, "<.*?>") %>% str_to_lower(),
+    body = str_remove_all(body, "<.*?>") |> str_to_lower(),
     body = str_remove_all(body, "[^a-z0-9 .-]"),
     body = str_remove_all(body, "nbsp")
   )
@@ -169,7 +168,7 @@ A corpus then gives me a collection of texts whereby each document is a newspape
 
 
 ```r
-trade_corp <- trade_df %>% 
+trade_corp <- trade_df |> 
   corpus(docid_field = "short_url", text_field = "body", unique_docnames = FALSE)
 ```
 
@@ -182,7 +181,7 @@ The chief negotiator for the EU is Michel Barnier, so I'll quantitatively identi
 window <- 5
 
 trade_fcm <-
-  trade_corp %>%
+  trade_corp |>
   fcm(context = "window", window = window, 
       count = "weighted", weights = window:1)
 
@@ -194,16 +193,16 @@ wv_main <- glove$fit_transform(trade_fcm, n_iter = 10)
 ```
 
 ```
-## INFO  [16:41:21.663] epoch 1, loss 0.3812 
-## INFO  [16:41:24.617] epoch 2, loss 0.2574 
-## INFO  [16:41:27.701] epoch 3, loss 0.2290 
-## INFO  [16:41:30.728] epoch 4, loss 0.2090 
-## INFO  [16:41:33.760] epoch 5, loss 0.1924 
-## INFO  [16:41:36.828] epoch 6, loss 0.1795 
-## INFO  [16:41:39.856] epoch 7, loss 0.1698 
-## INFO  [16:41:42.825] epoch 8, loss 0.1622 
-## INFO  [16:41:45.883] epoch 9, loss 0.1561 
-## INFO  [16:41:48.902] epoch 10, loss 0.1510
+## INFO  [12:24:27.611] epoch 1, loss 0.3798 
+## INFO  [12:24:30.456] epoch 2, loss 0.2566 
+## INFO  [12:24:33.402] epoch 3, loss 0.2281 
+## INFO  [12:24:36.322] epoch 4, loss 0.2082 
+## INFO  [12:24:39.260] epoch 5, loss 0.1917 
+## INFO  [12:24:42.150] epoch 6, loss 0.1790 
+## INFO  [12:24:45.113] epoch 7, loss 0.1693 
+## INFO  [12:24:48.049] epoch 8, loss 0.1617 
+## INFO  [12:24:51.014] epoch 9, loss 0.1556 
+## INFO  [12:24:53.941] epoch 10, loss 0.1505
 ```
 
 ```r
@@ -213,12 +212,12 @@ word_vectors <- wv_main + t(wv_context)
 search_coord <- 
   word_vectors["barnier", , drop = FALSE]
 
-word_vectors %>% 
-  sim2(search_coord, method = "cosine") %>% 
-  as_tibble(rownames = NA) %>% 
-  rownames_to_column("term") %>% 
-  rename(similarity = 2) %>% 
-  slice_max(similarity, n = 10) %>%
+word_vectors |> 
+  sim2(search_coord, method = "cosine") |> 
+  as_tibble(rownames = NA) |> 
+  rownames_to_column("term") |> 
+  rename(similarity = 2) |> 
+  slice_max(similarity, n = 10) |>
   kbl()
 ```
 
@@ -236,39 +235,39 @@ word_vectors %>%
   </tr>
   <tr>
    <td style="text-align:left;"> michel </td>
-   <td style="text-align:right;"> 0.8317228 </td>
+   <td style="text-align:right;"> 0.8412831 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> frost </td>
-   <td style="text-align:right;"> 0.8140611 </td>
+   <td style="text-align:right;"> 0.8136653 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> negotiator </td>
-   <td style="text-align:right;"> 0.8037279 </td>
+   <td style="text-align:right;"> 0.8102825 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> brussels </td>
-   <td style="text-align:right;"> 0.7039215 </td>
+   <td style="text-align:right;"> 0.7100695 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> negotiators </td>
-   <td style="text-align:right;"> 0.6431384 </td>
+   <td style="text-align:right;"> 0.6613339 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> team </td>
-   <td style="text-align:right;"> 0.6392188 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> eus </td>
-   <td style="text-align:right;"> 0.6350772 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> told </td>
-   <td style="text-align:right;"> 0.6252520 </td>
+   <td style="text-align:right;"> 0.6446460 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> chief </td>
-   <td style="text-align:right;"> 0.6206945 </td>
+   <td style="text-align:right;"> 0.6440991 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> eus </td>
+   <td style="text-align:right;"> 0.6391720 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> told </td>
+   <td style="text-align:right;"> 0.6103876 </td>
   </tr>
 </tbody>
 </table>
@@ -280,11 +279,11 @@ The word embeddings algorithm, through word co-occurrence, has identified the na
 
 ```r
 context_df <- 
-  trade_df %>% 
+  trade_df |> 
   filter(str_detect(body, "barnier|frost|uk-eu")) 
 
 context_corp <- 
-  context_df %>% 
+  context_df |> 
   corpus(docid_field = "short_url", text_field = "body")
 ```
 
@@ -294,18 +293,18 @@ Quanteda's `kwic` function shows key phrases in context to ensure we're homing i
 ```r
 set.seed(123)
 
-context_corp %>%
+context_corp |>
   tokens(
     remove_punct = TRUE,
     remove_symbols = TRUE,
     remove_numbers = TRUE
-  ) %>%
+  ) |>
   kwic(pattern = phrase(c("trade negotiation", "trade deal", "trade talks")), 
-       valuetype = "regex", window = 7) %>%
-  as_tibble() %>%
-  left_join(article_df, by = c("docname" = "short_url")) %>% 
-  slice_sample(n = 10) %>% 
-  select(docname, pre, keyword, post, headline) %>%
+       valuetype = "regex", window = 7) |>
+  as_tibble() |>
+  left_join(article_df, by = c("docname" = "short_url")) |> 
+  slice_sample(n = 10) |> 
+  select(docname, pre, keyword, post, headline) |>
   kbl()
 ```
 
@@ -400,10 +399,10 @@ Quanteda provides a sentiment dictionary which, in addition to identifying posit
 tic()
 
 sent_df <- 
-  context_corp %>% 
-  dfm(dictionary = data_dictionary_LSD2015) %>% 
-  as_tibble() %>%
-  left_join(context_df, by = c("doc_id" = "short_url")) %>% 
+  context_corp |> 
+  dfm(dictionary = data_dictionary_LSD2015) |> 
+  as_tibble() |>
+  left_join(context_df, by = c("doc_id" = "short_url")) |> 
   mutate(
     pos = positive + neg_negative,
     neg = negative + neg_positive,
@@ -411,9 +410,9 @@ sent_df <-
     pct_pos = pos / (pos + neg)
   )
 
-sent_df %>% 
-  select(doc_id, pos, neg) %>% 
-  slice(1:10) %>% 
+sent_df |> 
+  select(doc_id, pos, neg) |> 
+  slice(1:10) |> 
   kbl(col.names = c("Article", "Positive Score", "Negative Score"))
 ```
 
@@ -480,15 +479,15 @@ sent_df %>%
 </table>
 
 ```r
-summary_df <- sent_df %>% 
-  group_by(date) %>% 
+summary_df <- sent_df |> 
+  group_by(date) |> 
   summarise(pct_pos = mean(pct_pos), n = n())
 
 toc()
 ```
 
 ```
-## 1.169 sec elapsed
+## 1.17 sec elapsed
 ```
 
 Plotting the changing proportion of positive sentiment over time did surprise me a little. The outcome was more balanced than I expected which perhaps confirms the deeper impression left on me by negative articles.
@@ -501,31 +500,31 @@ The lower plot shows the volume of articles. As we draw closer to the crunch-poi
 ```r
 width <- 7
 
-sent_df2 <- sent_df %>%
-  mutate(web_date = as.Date(web_publication_date)) %>% 
-  group_by(web_date) %>%
-  summarise(pct_pos = sum(pos) / sum(neg + pos)) %>% 
+sent_df2 <- sent_df |>
+  mutate(web_date = as.Date(web_publication_date)) |> 
+  group_by(web_date) |>
+  summarise(pct_pos = sum(pos) / sum(neg + pos)) |> 
   mutate(
     roll_mean = slide_dbl(pct_pos, mean, .before = 6),
     roll_lq = slide_dbl(pct_pos, ~ quantile(.x, probs = 0.25), .before = 6),
     roll_uq = slide_dbl(pct_pos, ~ quantile(.x, probs = 0.75), .before = 6)
   )
 
-p1 <- sent_df2 %>%
+p1 <- sent_df2 |>
   ggplot(aes(web_date)) +
   geom_line(aes(y = roll_mean), colour = cols[1]) +
   geom_ribbon(aes(ymin = roll_lq, ymax = roll_uq), 
               alpha = 0.33, fill = cols[1]) +
   geom_hline(yintercept = 0.5, linetype = "dashed", 
              colour = cols[4], size = 1) +
-  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_y_continuous(labels = label_percent(accuracy = 1)) +
   labs(
     title = "Changing Sentiment Towards a UK-EU Trade Deal",
     subtitle = glue("Rolling {width} days Since the Withdrawal Agreement"),
     x = NULL, y = "Positive Sentiment"
   )
 
-p2 <- summary_df %>% 
+p2 <- summary_df |> 
   ggplot(aes(date, n)) +
   geom_line(colour = cols[1]) +
   labs(x = "Weeks", y = "Article Count",
@@ -542,23 +541,23 @@ Some writers exhibit more sentiment variation than others.
 
 ```r
 byline_df <- 
-  sent_df %>% 
-  mutate(byline = word(byline, 1, 2) %>% str_remove_all("[[:punct:]]")) %>% 
-  group_by(byline, date) %>% 
-  summarise(pct_pos = mean(pct_pos), n = n()) %>% 
+  sent_df |> 
+  mutate(byline = word(byline, 1, 2) |> str_remove_all("[[:punct:]]")) |> 
+  group_by(byline, date) |> 
+  summarise(pct_pos = mean(pct_pos), n = n()) |> 
   ungroup()
 
-top_3 <- byline_df %>% 
-  count(byline, sort = TRUE) %>% 
-  slice_head(n = 3) %>% 
+top_3 <- byline_df |> 
+  count(byline, sort = TRUE) |> 
+  slice_head(n = 3) |> 
   pull(byline)
 
-byline_df %>% 
-  filter(byline %in% top_3) %>% 
+byline_df |> 
+  filter(byline %in% top_3) |> 
   ggplot(aes(date, pct_pos, colour = byline)) +
   geom_line() +
   geom_hline(yintercept = 0.5, linetype = "dotted", colour = cols[2]) +
-  scale_y_continuous(labels = percent_format(), limits = c(0.2, 0.8)) +
+  scale_y_continuous(labels = label_percent(), limits = c(0.2, 0.8)) +
   scale_colour_manual(values = cols[c(1, 2, 4)]) +
   labs(title = "Changing Sentiment Towards a UK-EU Trade Deal",
        subtitle = "Three Selected Bylines",
@@ -626,7 +625,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> scales </td>
-   <td style="text-align:left;"> percent_format[2] </td>
+   <td style="text-align:left;"> label_percent[2] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> slider </td>

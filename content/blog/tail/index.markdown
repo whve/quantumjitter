@@ -8,18 +8,18 @@ categories:
 tags:
   - special effects
 summary: "If you're a cat, go find the nearest open pot of paint. No need to read further. But if you're a data scientist, what to do?"
-lastmod: '2022-04-26'
+lastmod: '2022-04-30'
 draft: false
 featured: false
 ---
 
 
 
+![](/blog/tail/featured.GIF)
+
 If you're a cat, go find the nearest open pot of paint. No need to read further.
 
 But if you're a data scientist looking to paint the tail of a density plot, what to do?
-
-![](/blog/tail/featured.GIF)
 
 There are techniques for [painting a region under a curve](https://stackoverflow.com/questions/12429333/how-to-shade-a-region-under-a-curve-using-ggplot2). But the experimental [ggfx](https://ggfx.data-imaginist.com) package offers an interesting alternative solution based on the blending modes familiar to users of Photoshop.
 
@@ -78,6 +78,8 @@ p1 + p2
 Of course the red box could also be layered behind a density curve with alpha applied so it shows through. But if the preference is tail-only colouring, it's a neat solution.
 
 Blending is actually a handy solution for any awkward shape. The same technique is used here with a time series ribbon summarising the median, lower and upper quartiles of a set of closing stock prices.
+
+[Note this patch if having prob lems with `tq_get`](https://stackoverflow.com/questions/72051854/quantmodgetsymbols-cannot-retrieve-data-from-yahoo-finance)
 
 
 ```r

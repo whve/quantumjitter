@@ -8,7 +8,7 @@ categories:
 tags:
   - quant
 summary: Covid-19 began battering the financial markets in February. Which sectors are faring best when comparing each in the S&P 500 with the overall market since February 19th, 2020.
-lastmod: '2022-04-10'
+lastmod: '2022-04-30'
 draft: false
 featured: false
 ---
@@ -17,9 +17,9 @@ featured: false
 
 
 
-Covid-19 began battering the financial markets in 2020 Which sectors are faring best?
-
 ![](/project/storm/featured.GIF)
+
+Covid-19 began battering the financial markets in 2020 Which sectors are faring best?
 
 I'll compare each sector in the S&P 500 with the overall market. Baselining each at 100% as of February 19th, we'll see which were the first to recover lost ground.
 
@@ -63,15 +63,17 @@ symbols <-
 
 from <- "2020-02-19"
 
-from_formatted <- date_parse(from, format = "%Y-%m-%d") %>% 
+from_formatted <- date_parse(from, format = "%Y-%m-%d") |> 
   date_format(format = "%b %d, %Y")
 ```
+
+[Note this patch if having prob lems with `tq_get`](https://stackoverflow.com/questions/72051854/quantmodgetsymbols-cannot-retrieve-data-from-yahoo-finance)
 
 
 ```r
 eod_sectors <-
-  tq_get(symbols, get = "stock.prices", from = from) %>%
-  group_by(symbol) %>%
+  tq_get(symbols, from = from) |>
+  group_by(symbol) |>
   mutate(
     norm_close = adjusted / first(adjusted),
     type = if_else(symbol == "SPY", "Market", "Sector"),
@@ -90,8 +92,8 @@ eod_sectors <-
       symbol == "XLP"  ~ "Consumer Staples",
       TRUE             ~ "Other"
     )
-  ) %>%
-  ungroup() %>% 
+  ) |>
+  ungroup() |> 
   drop_na()
 ```
 
@@ -99,11 +101,11 @@ Perhaps not too surprising to see that Tech led the way back. Energy has proven 
 
 
 ```r
-eod_sectors %>%
+eod_sectors |>
   mutate(
     sector = str_wrap(sector, 12),
     sector = fct_reorder(sector, norm_close, last, .desc = TRUE)
-  ) %>%
+  ) |>
   ggplot(aes(date, norm_close, colour = type)) +
   geom_rect(aes(xmin = min(date), xmax = max(date), ymin = -Inf, ymax = Inf),
     fill = if_else(eod_sectors$type == "Market", cols[1], NULL), colour = "white"
@@ -112,7 +114,7 @@ eod_sectors %>%
   geom_line(key_glyph = "timeseries") +
   facet_wrap(~sector) +
   scale_colour_manual(values = cols[c(3, 4)]) +
-  scale_y_continuous(labels = percent_format()) +
+  scale_y_continuous(labels = label_percent()) +
   labs(
     title = "S&P 500 Sector Impact of Covid-19",
     subtitle = glue("Relative to {from_formatted}"),
@@ -173,7 +175,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> scales </td>
-   <td style="text-align:left;"> percent_format[1] </td>
+   <td style="text-align:left;"> label_percent[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> stringr </td>

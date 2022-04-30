@@ -10,7 +10,7 @@ tags:
   - machine learning
   - text mining
 summary: The Natural History Museum began [recording cetacean]( https://data.nhm.ac.uk/dataset/historical-uk-cetacean-strandings-dataset) strandings in 1913. For some records the species is uncertain. Could these be predicted using [tidymodels](https://www.tidymodels.org) and [textrecipes](https://textrecipes.tidymodels.org)?
-lastmod: '2022-04-10'
+lastmod: '2022-04-30'
 draft: false
 featured: false
 ---
@@ -27,9 +27,9 @@ featured: false
 
 
 
-The Natural History Museum began recording cetacean (whales, dolphins and porpoises) strandings in 1913. I'd like to explore this [1913-1989 dataset]( https://data.nhm.ac.uk/dataset/historical-uk-cetacean-strandings-dataset). 
-
 ![](/project/cetacea/featured.GIF)
+
+The Natural History Museum began recording cetacean (whales, dolphins and porpoises) strandings in 1913. I'd like to explore this [1913-1989 dataset]( https://data.nhm.ac.uk/dataset/historical-uk-cetacean-strandings-dataset). 
 
 
 ```r
@@ -62,8 +62,8 @@ theme_set(theme_bw())
 
 
 ```r
-strandings_df <- read_csv("strandings.csv") %>%
-  clean_names() %>% 
+strandings_df <- read_csv("strandings.csv") |>
+  clean_names() |> 
   mutate(
     date = date_parse(date, format = "%d/%m/%Y"),
     length = parse_number(length_et),
@@ -81,14 +81,14 @@ Some of the `species` labels contain a question mark or forward slash. This indi
 
 ```r
 strandings_df2 <- 
-  strandings_df %>% 
+  strandings_df |> 
   mutate(species_uncertainty =
       if_else(str_detect(species, "[?/]"), "Uncertain", "Known"))
 
-strandings_df2 %>% 
-  filter(species_uncertainty == "Uncertain") %>% 
-  count(species, sort = TRUE, name = "Count") %>% 
-  slice_head(n = 6) %>% 
+strandings_df2 |> 
+  filter(species_uncertainty == "Uncertain") |> 
+  count(species, sort = TRUE, name = "Count") |> 
+  slice_head(n = 6) |> 
   kbl()
 ```
 
@@ -132,8 +132,8 @@ The `date` variable has many NA's. Fortunately, the components to construct many
 
 
 ```r
-strandings_df2 %>% 
-  select(date, year_val, month_val, day_val) %>% 
+strandings_df2 |> 
+  select(date, year_val, month_val, day_val) |> 
   summary()
 ```
 
@@ -149,36 +149,36 @@ strandings_df2 %>%
 ```
 
 ```r
-strandings_df3 <- strandings_df2 %>%
-  group_by(species) %>% 
+strandings_df3 <- strandings_df2 |>
+  group_by(species) |> 
   mutate(
-    month_val = if_else(month_val == 0, mean(month_val) %>% 
+    month_val = if_else(month_val == 0, mean(month_val) |> 
                           as.integer(), month_val),
-    day_val = if_else(day_val == 0, mean(day_val) %>% as.integer(), day_val),
+    day_val = if_else(day_val == 0, mean(day_val) |> as.integer(), day_val),
     day_val = if_else(day_val == 0, 1L, day_val),
     date2 = date_build(year_val, month_val, day_val, invalid = "NA"),
-  ) %>% 
-  ungroup() %>% 
-  mutate(date3 = coalesce(date, date2)) %>% 
-  arrange(id) %>% 
-  mutate(date = if_else(is.na(date), lag(date3), date3)) %>% 
+  ) |> 
+  ungroup() |> 
+  mutate(date3 = coalesce(date, date2)) |> 
+  arrange(id) |> 
+  mutate(date = if_else(is.na(date), lag(date3), date3)) |> 
   select(-date2, -date3, -ends_with("_val"))
 
 example_species <-
   c("musculus", "melas", "crassidens", "borealis", "coeruleoalba")
 
-known_species <- strandings_df3 %>% 
+known_species <- strandings_df3 |> 
   filter(species_uncertainty == "Known")
 
 plot_date_feature <- function(var) {
-  known_species %>%
+  known_species |>
     mutate(
       year = get_year(date),
       month = get_month(date),
-      week = as_iso_year_week_day(date) %>% get_week()
-    ) %>%
-    filter(species %in% example_species) %>%
-    count(species, {{ var }}) %>%
+      week = as_iso_year_week_day(date) |> get_week()
+    ) |>
+    filter(species %in% example_species) |>
+    count(species, {{ var }}) |>
     ggplot(aes(species, {{ var }})) +
     geom_violin(
       alpha = 0.7,
@@ -193,8 +193,8 @@ plot_date_feature <- function(var) {
     )
 }
 
-c("year", "month", "week") %>% 
-  map(sym) %>% 
+c("year", "month", "week") |> 
+  map(sym) |> 
   map(plot_date_feature)
 ```
 
@@ -230,7 +230,7 @@ uki <- map_data("world", region = c("uk", "ireland"))
 
 labels <- c("Mass", "Single")
 
-uki %>% 
+uki |> 
   ggplot() +
   geom_map(aes(long, lat, map_id = region), map = uki, 
            colour = "black", fill = "grey90", size = 0.1) +
@@ -252,9 +252,9 @@ uki %>%
 
 ```r
 # Add history of mass stranding
-strandings_df4 <- strandings_df3 %>% 
-  group_by(species) %>%
-  mutate(mass_possible = min(mass_single, na.rm = TRUE)) %>%
+strandings_df4 <- strandings_df3 |> 
+  group_by(species) |>
+  mutate(mass_possible = min(mass_single, na.rm = TRUE)) |>
   ungroup()
 ```
 
@@ -262,16 +262,16 @@ Some records are missing the `length` measurement of the mammal. Nonetheless, wh
 
 
 ```r
-known_species %>%
+known_species |>
   mutate(sex = case_when(
     sex == "M" ~ "Male",
     sex == "F" ~ "Female",
     TRUE       ~ "Unknown"
-  )) %>% 
-  filter(species_lumped != "Other") %>% 
-  count(species_lumped, length, sex) %>% 
+  )) |> 
+  filter(species_lumped != "Other") |> 
+  count(species_lumped, length, sex) |> 
   mutate(species_lumped = fct_reorder(species_lumped, 
-                                      desc(length), min, na.rm = TRUE)) %>% 
+                                      desc(length), min, na.rm = TRUE)) |> 
   ggplot(aes(species_lumped, length)) + 
   geom_violin(aes(fill = if_else(str_detect(species_lumped, "^de|^co"), 
                                  TRUE, FALSE)), show.legend = FALSE) +
@@ -288,9 +288,9 @@ With map coordinates not always available, `county` could be, with a little stri
 
 
 ```r
-strandings_df4 %>% 
-  count(county) %>% 
-  filter(str_detect(county, "Shet|Northumberland")) %>% 
+strandings_df4 |> 
+  count(county) |> 
+  filter(str_detect(county, "Shet|Northumberland")) |> 
   kbl(col.names = c("County", "Count"))
 ```
 
@@ -341,7 +341,7 @@ regex_pattern <-
     " &.*$",
     "[-.]$")
 
-strandings_df5 <- strandings_df4 %>%
+strandings_df5 <- strandings_df4 |>
   mutate(
     county = str_remove_all(county, str_c(regex_pattern, collapse = "|")),
     county = recode(
@@ -354,7 +354,7 @@ strandings_df5 <- strandings_df4 %>%
     )
   ) 
 
-strandings_df4 %>%
+strandings_df4 |>
   summarise(counties_before = n_distinct(county))
 ```
 
@@ -366,7 +366,7 @@ strandings_df4 %>%
 ```
 
 ```r
-strandings_df5 %>%
+strandings_df5 |>
   summarise(counties_after = n_distinct(county))
 ```
 
@@ -381,7 +381,7 @@ Whilst `count` also appears to hold, based on the plot pattern below, species-re
 
 
 ```r
-strandings_df5 %>%
+strandings_df5 |>
   ggplot(aes(species, count, colour = species_uncertainty)) +
   geom_jitter(alpha = 0.5, size = 2) +
   coord_flip() +
@@ -411,8 +411,8 @@ I'll tune the model using `tune_race_anova` which quickly discards hyperparamete
 
 
 ```r
-known_species <- strandings_df5 %>%
-  filter(species_uncertainty == "Known") %>%
+known_species <- strandings_df5 |>
+  filter(species_uncertainty == "Known") |>
   mutate(across(
     c(
       "species",
@@ -429,13 +429,13 @@ known_species <- strandings_df5 %>%
 set.seed(123)
 
 data_split <-
-  known_species %>%
-  mutate(species = fct_drop(species)) %>% 
+  known_species |>
+  mutate(species = fct_drop(species)) |> 
   initial_split(strata = species)
 
-train <- data_split %>% training()
+train <- data_split |> training()
 
-test <- data_split %>% testing()
+test <- data_split |> testing()
 
 predictors <-
   c(
@@ -452,33 +452,33 @@ predictors <-
   )
 
 recipe <-
-  train %>%
-  recipe() %>%
-  update_role(species, new_role = "outcome") %>%
-  update_role(all_of(predictors), new_role = "predictor") %>%
+  train |>
+  recipe() |>
+  update_role(species, new_role = "outcome") |>
+  update_role(all_of(predictors), new_role = "predictor") |>
   update_role(!has_role("outcome") & !has_role("predictor"), 
-              new_role = "id") %>%
+              new_role = "id") |>
   step_date(date, features = c("decimal", "week", "month", "year"), 
-            label = FALSE) %>%
-  step_tokenize(location, comment) %>%
-  step_stopwords(location, comment) %>%
-  step_tokenfilter(location, comment, max_tokens = tune()) %>% #100
-  step_tf(location, comment) %>%
-  step_zv(all_predictors()) %>%
+            label = FALSE) |>
+  step_tokenize(location, comment) |>
+  step_stopwords(location, comment) |>
+  step_tokenfilter(location, comment, max_tokens = tune()) |> #100
+  step_tf(location, comment) |>
+  step_zv(all_predictors()) |>
   step_dummy(all_nominal_predictors())
 
 xgb_model <-
   boost_tree(trees = tune(), # 440
              mtry = tune(), # 0.6
-             learn_rate = 0.02) %>% 
-  set_mode("classification") %>%
+             learn_rate = 0.02) |> 
+  set_mode("classification") |>
   set_engine("xgboost", 
              count = FALSE,
              verbosity = 0,
              tree_method = "hist")
 
-xgb_wflow <- workflow() %>%
-  add_recipe(recipe) %>%
+xgb_wflow <- workflow() |>
+  add_recipe(recipe) |>
   add_model(xgb_model)
 
 set.seed(9)
@@ -489,7 +489,7 @@ set.seed(10)
 
 tic()
 
-tune_result <- xgb_wflow %>%
+tune_result <- xgb_wflow |>
   tune_race_anova(
     resamples = folds,
     grid = crossing(
@@ -505,11 +505,11 @@ toc()
 ```
 
 ```
-## 478.447 sec elapsed
+## 476.418 sec elapsed
 ```
 
 ```r
-tune_result %>% 
+tune_result |> 
   plot_race() + 
   labs(title = "Early Elimination of Parameter Combinations")
 ```
@@ -519,9 +519,9 @@ tune_result %>%
 ```r
 set.seed(123)
 
-xgb_fit <- xgb_wflow %>%
-  finalize_workflow(tune_result %>% 
-                      select_best(metric = "accuracy")) %>% 
+xgb_fit <- xgb_wflow |>
+  finalize_workflow(tune_result |> 
+                      select_best(metric = "accuracy")) |> 
   fit(train)
 ```
 
@@ -531,10 +531,10 @@ Without spending time on alternative models, we're getting a reasonable result f
 
 
 ```r
-xgb_results <- xgb_fit %>% 
+xgb_results <- xgb_fit |> 
   augment(new_data = test)
 
-xgb_results %>%
+xgb_results |>
   accuracy(species, .pred_class)
 ```
 
@@ -546,8 +546,8 @@ xgb_results %>%
 ```
 
 ```r
-xgb_results %>%
-  conf_mat(species, .pred_class) %>%
+xgb_results |>
+  conf_mat(species, .pred_class) |>
   autoplot(type = "heatmap") +
   scale_fill_gradient2(
     mid = "white",
@@ -564,10 +564,10 @@ The top variable importance scores include `fam_genus`, many of the `comment` to
 
 
 ```r
-vi(xgb_fit %>% extract_fit_parsnip()) %>% 
-  arrange(desc(Importance)) %>% 
-  mutate(ranking = row_number()) %>% 
-  slice_head(n = 40) %>% 
+vi(xgb_fit |> extract_fit_parsnip()) |> 
+  arrange(desc(Importance)) |> 
+  mutate(ranking = row_number()) |> 
+  slice_head(n = 40) |> 
   kbl()
 ```
 
@@ -581,203 +581,203 @@ vi(xgb_fit %>% extract_fit_parsnip()) %>%
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> fam_genus_Globicephala </td>
-   <td style="text-align:right;"> 0.1170072 </td>
+   <td style="text-align:left;"> fam_genus_Phocoena </td>
+   <td style="text-align:right;"> 0.1215845 </td>
    <td style="text-align:right;"> 1 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_Phocoena </td>
-   <td style="text-align:right;"> 0.0944623 </td>
+   <td style="text-align:left;"> fam_genus_Globicephala </td>
+   <td style="text-align:right;"> 0.0816541 </td>
    <td style="text-align:right;"> 2 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> tf_comment_unidentified </td>
-   <td style="text-align:right;"> 0.0759441 </td>
+   <td style="text-align:right;"> 0.0736307 </td>
    <td style="text-align:right;"> 3 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> fam_genus_Delphinus </td>
-   <td style="text-align:right;"> 0.0711414 </td>
+   <td style="text-align:right;"> 0.0710860 </td>
    <td style="text-align:right;"> 4 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_false </td>
-   <td style="text-align:right;"> 0.0504881 </td>
+   <td style="text-align:left;"> fam_genus_Tursiops </td>
+   <td style="text-align:right;"> 0.0500141 </td>
    <td style="text-align:right;"> 5 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_Tursiops </td>
-   <td style="text-align:right;"> 0.0465281 </td>
+   <td style="text-align:left;"> tf_comment_false </td>
+   <td style="text-align:right;"> 0.0498405 </td>
    <td style="text-align:right;"> 6 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> fam_genus_Lagenorhynchus </td>
-   <td style="text-align:right;"> 0.0443353 </td>
+   <td style="text-align:right;"> 0.0448997 </td>
    <td style="text-align:right;"> 7 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_porpoise </td>
-   <td style="text-align:right;"> 0.0403505 </td>
+   <td style="text-align:left;"> tf_comment_finned </td>
+   <td style="text-align:right;"> 0.0341306 </td>
    <td style="text-align:right;"> 8 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> tf_comment_sided </td>
-   <td style="text-align:right;"> 0.0285027 </td>
+   <td style="text-align:right;"> 0.0302409 </td>
    <td style="text-align:right;"> 9 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_Grampus </td>
-   <td style="text-align:right;"> 0.0276863 </td>
+   <td style="text-align:left;"> tf_comment_long </td>
+   <td style="text-align:right;"> 0.0244866 </td>
    <td style="text-align:right;"> 10 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_lesser </td>
-   <td style="text-align:right;"> 0.0275691 </td>
+   <td style="text-align:left;"> fam_genus_Hyperoodon </td>
+   <td style="text-align:right;"> 0.0240353 </td>
    <td style="text-align:right;"> 11 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> length </td>
-   <td style="text-align:right;"> 0.0265941 </td>
+   <td style="text-align:right;"> 0.0230962 </td>
    <td style="text-align:right;"> 12 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_Hyperoodon </td>
-   <td style="text-align:right;"> 0.0232933 </td>
+   <td style="text-align:left;"> fam_genus_Grampus </td>
+   <td style="text-align:right;"> 0.0227513 </td>
    <td style="text-align:right;"> 13 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> tf_comment_beaked </td>
-   <td style="text-align:right;"> 0.0230283 </td>
+   <td style="text-align:right;"> 0.0219021 </td>
    <td style="text-align:right;"> 14 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_Orcinus </td>
-   <td style="text-align:right;"> 0.0194158 </td>
+   <td style="text-align:left;"> tf_comment_lesser </td>
+   <td style="text-align:right;"> 0.0215853 </td>
    <td style="text-align:right;"> 15 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_Pseudorca </td>
-   <td style="text-align:right;"> 0.0186163 </td>
+   <td style="text-align:left;"> tf_comment_rorqual </td>
+   <td style="text-align:right;"> 0.0199182 </td>
    <td style="text-align:right;"> 16 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> tf_comment_dolphin </td>
-   <td style="text-align:right;"> 0.0182272 </td>
+   <td style="text-align:right;"> 0.0198597 </td>
    <td style="text-align:right;"> 17 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_bottle </td>
-   <td style="text-align:right;"> 0.0169981 </td>
+   <td style="text-align:left;"> fam_genus_Orcinus </td>
+   <td style="text-align:right;"> 0.0194480 </td>
    <td style="text-align:right;"> 18 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_Physeter </td>
-   <td style="text-align:right;"> 0.0158601 </td>
+   <td style="text-align:left;"> tf_comment_porpoise </td>
+   <td style="text-align:right;"> 0.0192418 </td>
    <td style="text-align:right;"> 19 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_rorqual </td>
-   <td style="text-align:right;"> 0.0138746 </td>
+   <td style="text-align:left;"> tf_comment_bottle </td>
+   <td style="text-align:right;"> 0.0165892 </td>
    <td style="text-align:right;"> 20 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_Ziphius </td>
-   <td style="text-align:right;"> 0.0131200 </td>
+   <td style="text-align:left;"> fam_genus_Pseudorca </td>
+   <td style="text-align:right;"> 0.0159957 </td>
    <td style="text-align:right;"> 21 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> mass_possible_S </td>
-   <td style="text-align:right;"> 0.0131200 </td>
+   <td style="text-align:left;"> fam_genus_Physeter </td>
+   <td style="text-align:right;"> 0.0159090 </td>
    <td style="text-align:right;"> 22 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_Mesoplodon </td>
-   <td style="text-align:right;"> 0.0125859 </td>
+   <td style="text-align:left;"> tf_comment_risso's </td>
+   <td style="text-align:right;"> 0.0131135 </td>
    <td style="text-align:right;"> 23 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_odontocete </td>
-   <td style="text-align:right;"> 0.0107553 </td>
+   <td style="text-align:left;"> mass_possible_S </td>
+   <td style="text-align:right;"> 0.0127573 </td>
    <td style="text-align:right;"> 24 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_fin </td>
-   <td style="text-align:right;"> 0.0106025 </td>
+   <td style="text-align:left;"> fam_genus_Mesoplodon </td>
+   <td style="text-align:right;"> 0.0123743 </td>
    <td style="text-align:right;"> 25 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_long </td>
-   <td style="text-align:right;"> 0.0102623 </td>
+   <td style="text-align:left;"> tf_comment_fin </td>
+   <td style="text-align:right;"> 0.0122737 </td>
    <td style="text-align:right;"> 26 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> date_decimal </td>
-   <td style="text-align:right;"> 0.0100120 </td>
+   <td style="text-align:left;"> fam_genus_Ziphius </td>
+   <td style="text-align:right;"> 0.0122521 </td>
    <td style="text-align:right;"> 27 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_finned </td>
-   <td style="text-align:right;"> 0.0093989 </td>
+   <td style="text-align:left;"> fam_genus_odontocete </td>
+   <td style="text-align:right;"> 0.0109274 </td>
    <td style="text-align:right;"> 28 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_nosed </td>
-   <td style="text-align:right;"> 0.0093516 </td>
+   <td style="text-align:left;"> fam_genus_cetacean </td>
+   <td style="text-align:right;"> 0.0104412 </td>
    <td style="text-align:right;"> 29 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_pilot </td>
-   <td style="text-align:right;"> 0.0093481 </td>
+   <td style="text-align:left;"> tf_comment_killer </td>
+   <td style="text-align:right;"> 0.0099741 </td>
    <td style="text-align:right;"> 30 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_common </td>
-   <td style="text-align:right;"> 0.0089965 </td>
+   <td style="text-align:left;"> fam_genus_Stenella </td>
+   <td style="text-align:right;"> 0.0087018 </td>
    <td style="text-align:right;"> 31 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_Stenella </td>
-   <td style="text-align:right;"> 0.0085796 </td>
+   <td style="text-align:left;"> date_decimal </td>
+   <td style="text-align:right;"> 0.0081614 </td>
    <td style="text-align:right;"> 32 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_whale </td>
-   <td style="text-align:right;"> 0.0084079 </td>
+   <td style="text-align:left;"> tf_comment_nosed </td>
+   <td style="text-align:right;"> 0.0075943 </td>
    <td style="text-align:right;"> 33 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_risso's </td>
-   <td style="text-align:right;"> 0.0082206 </td>
+   <td style="text-align:left;"> date_year </td>
+   <td style="text-align:right;"> 0.0072361 </td>
    <td style="text-align:right;"> 34 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> date_year </td>
-   <td style="text-align:right;"> 0.0072894 </td>
+   <td style="text-align:left;"> tf_comment_whale </td>
+   <td style="text-align:right;"> 0.0071684 </td>
    <td style="text-align:right;"> 35 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_killer </td>
-   <td style="text-align:right;"> 0.0070108 </td>
+   <td style="text-align:left;"> tf_comment_white </td>
+   <td style="text-align:right;"> 0.0067214 </td>
    <td style="text-align:right;"> 36 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_white </td>
-   <td style="text-align:right;"> 0.0067963 </td>
+   <td style="text-align:left;"> mass_single_S </td>
+   <td style="text-align:right;"> 0.0041988 </td>
    <td style="text-align:right;"> 37 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> fam_genus_cetacean </td>
-   <td style="text-align:right;"> 0.0060907 </td>
+   <td style="text-align:left;"> tf_comment_common </td>
+   <td style="text-align:right;"> 0.0041767 </td>
    <td style="text-align:right;"> 38 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> tf_comment_sowerby's </td>
-   <td style="text-align:right;"> 0.0039810 </td>
+   <td style="text-align:left;"> tf_comment_cuvier's </td>
+   <td style="text-align:right;"> 0.0036603 </td>
    <td style="text-align:right;"> 39 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> latitude </td>
-   <td style="text-align:right;"> 0.0030011 </td>
+   <td style="text-align:left;"> tf_comment_sowerby's </td>
+   <td style="text-align:right;"> 0.0036372 </td>
    <td style="text-align:right;"> 40 </td>
   </tr>
 </tbody>
@@ -789,16 +789,16 @@ The class probability is spread across 27 species. I'm going to set a high thres
 
 
 ```r
-xgb_preds <- xgb_fit %>% 
-  augment(new_data = strandings_df5 %>% 
+xgb_preds <- xgb_fit |> 
+  augment(new_data = strandings_df5 |> 
             filter(species_uncertainty == "Uncertain"))
 
-species_levels <- xgb_preds %>% 
-  select(starts_with(".pred_"), -.pred_class) %>% 
-  names() %>% 
+species_levels <- xgb_preds |> 
+  select(starts_with(".pred_"), -.pred_class) |> 
+  names() |> 
   as.factor()
 
-subset_df <- xgb_preds %>%
+subset_df <- xgb_preds |>
   mutate(
     .class_pred = make_class_pred(
       .pred_acutorostrata,
@@ -833,10 +833,10 @@ subset_df <- xgb_preds %>%
     )
   )
 
-subset_df %>%
-  group_by(species, .class_pred) %>% 
-  summarise(n = n()) %>% 
-  arrange(species, desc(n)) %>% 
+subset_df |>
+  group_by(species, .class_pred) |> 
+  summarise(n = n()) |> 
+  arrange(species, desc(n)) |> 
   kbl(col.names = c("Actual Label", "Predicted Label", "Count"))
 ```
 

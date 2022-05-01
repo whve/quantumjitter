@@ -8,8 +8,9 @@ categories:
 tags:
   - statistical inference
   - regex
+  - special effects
 summary: Are the residential property bands of [3 decades ago](https://www.gov.uk/guidance/understand-how-council-tax-bands-are-assessed#council-tax-bands-in-england-based-on-1-april-1991-values) becoming less so? Would a sample of those recently-sold reveal band convergence? And what may be inferred about those not sampled?
-lastmod: '2022-04-10'
+lastmod: '2022-05-01'
 draft: false
 featured: false
 ---
@@ -20,9 +21,9 @@ featured: false
 
 
 
-Are the distinct residential property bands of [3 decades ago](https://www.gov.uk/guidance/understand-how-council-tax-bands-are-assessed#council-tax-bands-in-england-based-on-1-april-1991-values) becoming less so?
-
 ![](/project/bands/featured.JPG)
+
+Are the distinct residential property bands of [3 decades ago](https://www.gov.uk/guidance/understand-how-council-tax-bands-are-assessed#council-tax-bands-in-england-based-on-1-april-1991-values) becoming less so?
 
 Over the years, urban properties have been added to and divided up. And two streets of equal attractiveness, and with equivalently-banded properties, may have diverged as neighbourhoods evolved. 
 
@@ -57,7 +58,7 @@ scale_fill_continuous <- function(...) scale_fill_distiller(palette = col)
 
 cols <- brewer.pal(7, col)
 
-tibble(x = 1, y = 1, fill = 7:1) %>% 
+tibble(x = 1, y = 1, fill = 7:1) |> 
   ggplot(aes(x, y, fill = fill)) +
   as_reference(geom_col(show.legend = FALSE), id = "cols") +
   with_blend(
@@ -128,9 +129,9 @@ url3 <- "&filters.bandStatus=Current"
 index <- crossing(band = LETTERS[1:8], page = seq(0, 120, 1))
 
 band_df <- map2_dfr(index$band, index$page, possibly(function(i, j) {
-  str_c(url1, i, url2, j, url3) %>%
-    read_html() %>%
-    html_element("#search-results-table") %>%
+  str_c(url1, i, url2, j, url3) |>
+    read_html() |>
+    html_element("#search-results-table") |>
     html_table(convert = FALSE)
 }, otherwise = NA_character_))
 ```
@@ -140,8 +141,8 @@ band_df <- map2_dfr(index$band, index$page, possibly(function(i, j) {
 
 ```r
 band_df2 <- 
-  band_df %>% 
-  clean_names() %>% 
+  band_df |> 
+  clean_names() |> 
   mutate(postcode = str_extract(address, "SW10 .+$"),
          raw_band_address = str_remove(address, ", London, SW10 .+$"),
          address = str_remove_all(address, remove_pattern),
@@ -187,29 +188,27 @@ WHERE
     BIND(ppd:standardPricePaidTransaction AS ?ppd_transactionCategory)
   }'
 
-prices_df <- 
-  SPARQL(endpoint, query) %>% 
-  .$results %>%
-  as_tibble()
+prices_list <- SPARQL(endpoint, query)
 ```
 
 
 ```r
 prices_df2 <-
-  prices_df %>% 
-  clean_names() %>%
-  rename_with(~ str_remove_all(., "ppd_|property_address_")) %>%
+  prices_list$results |>
+  as_tibble() |> 
+  clean_names() |>
+  rename_with(~ str_remove_all(., "ppd_|property_address_")) |>
   mutate(
-    transaction_date = new_datetime(transaction_date) %>% as_date(),
+    transaction_date = new_datetime(transaction_date) |> as_date(),
     price_paid = price_paid / 1000000
-  ) %>%
-  filter(transaction_date < "2022-01-01") %>%
+  ) |>
+  filter(transaction_date < "2022-01-01") |>
   mutate(
     raw_price_address = str_c(str_replace_na(saon, ""), 
-                              paon, street, sep = " ") %>% str_squish(),
+                              paon, street, sep = " ") |> str_squish(),
     address = str_remove_all(raw_price_address, remove_pattern),
     address = str_replace(address, swizzle_from, swizzle_to)
-  ) %>%
+  ) |>
   select(
     address,
     raw_price_address,
@@ -227,10 +226,10 @@ Now there's a common key to join the data.
 
 ```r
 joined_df <-
-  prices_df2 %>%
-  inner_join(band_df2, by = c("address", "postcode")) %>%
-  relocate(raw_band_address, .after = raw_price_address) %>%
-  arrange(postcode, address) %>%
+  prices_df2 |>
+  inner_join(band_df2, by = c("address", "postcode")) |>
+  relocate(raw_band_address, .after = raw_price_address) |>
+  arrange(postcode, address) |>
   mutate(council_tax_band = factor(council_tax_band))
 ```
 
@@ -248,14 +247,14 @@ Even though only recent sales transactions have been selected, a small movement 
 
 
 ```r
-joined_df %>%
-  select(transaction_date, price_paid, council_tax_band) %>%
-  mutate(yearquarter = yearquarter(transaction_date)) %>%
-  count(yearquarter, council_tax_band) %>%
+joined_df |>
+  select(transaction_date, price_paid, council_tax_band) |>
+  mutate(yearquarter = yearquarter(transaction_date)) |>
+  count(yearquarter, council_tax_band) |>
   ggplot(aes(yearquarter, n, fill = council_tax_band)) +
   geom_col(position = position_fill()) +
   scale_x_yearquarter() +
-  scale_y_continuous(labels = percent_format(1)) +
+  scale_y_continuous(labels = label_percent(1)) +
   scale_fill_manual(values = cols[c(1:7)]) +
   labs(
     title = "Distribution of Sales Transactions by Band & Quarter",
@@ -269,24 +268,24 @@ A violin plot of the property values by band shows some bimodal distribution and
 
 
 ```r
-labels <- joined_df %>%
-  group_by(council_tax_band) %>%
+labels <- joined_df |>
+  group_by(council_tax_band) |>
   summarise(n = n(), mean_price = mean(price_paid))
 
 transactions <-
-  joined_df %>%
-  count() %>%
+  joined_df |>
+  count() |>
   pull()
 
-from <- joined_df %>%
-  summarise(min(transaction_date) %>% yearquarter()) %>%
+from <- joined_df |>
+  summarise(min(transaction_date) |> yearquarter()) |>
   pull()
 
-to <- joined_df %>%
-  summarise(max(transaction_date) %>% yearquarter()) %>%
+to <- joined_df |>
+  summarise(max(transaction_date) |> yearquarter()) |>
   pull()
 
-joined_df %>%
+joined_df |>
   ggplot(aes(council_tax_band, price_paid)) +
   geom_violin(fill = cols[1]) +
   geom_label(aes(label = glue(
@@ -295,7 +294,7 @@ joined_df %>%
   ), y = 16),
   data = labels, size = 2.3, alpha = 0.7, fill = "white"
   ) +
-  scale_y_log10(labels = dollar_format(
+  scale_y_log10(labels = label_dollar(
     prefix = "£",
     suffix = "m", accuracy = 0.1
   )) +
@@ -314,7 +313,7 @@ joined_df %>%
 
 
 ```r
-joined_df2 <- joined_df %>%
+joined_df2 <- joined_df |>
   mutate(`SW10 0JR` = if_else(postcode == "SW10 0JR", "Yes", "No"))
 ```
 
@@ -324,7 +323,7 @@ These specific transactions feel somewhat unusual at these banding levels. And i
 
 
 ```r
-joined_df2 %>%
+joined_df2 |>
   ggplot(aes(council_tax_band, price_paid, fill = `SW10 0JR`)) +
   geom_violin() +
   geom_label(aes(label = glue(
@@ -334,7 +333,7 @@ joined_df2 %>%
   data = labels, size = 2.3, alpha = 0.7, fill = "white"
   ) +
   geom_hline(yintercept = 0.3, linetype = "dashed") +
-  scale_y_log10(labels = dollar_format(
+  scale_y_log10(labels = label_dollar(
     prefix = "£",
     suffix = "m", accuracy = 0.1
   )) +
@@ -353,9 +352,9 @@ joined_df2 %>%
 <img src="{{< blogdown/postref >}}index_files/figure-html/anomaly-1.png" width="100%" />
 
 ```r
-joined_df2 %>%
-  count(postcode, sort = TRUE) %>%
-  slice_head(n = 10) %>%
+joined_df2 |>
+  count(postcode, sort = TRUE) |>
+  slice_head(n = 10) |>
   kbl()
 ```
 
@@ -414,7 +413,7 @@ So, I'll remove this postcode.
 
 
 ```r
-joined_df3 <- joined_df %>% 
+joined_df3 <- joined_df |> 
   filter(postcode != "SW10 0JR")
 ```
 
@@ -422,16 +421,16 @@ This now feels like a representative sample of 284 property transactions. And br
 
 
 ```r
-labels <- joined_df3 %>%
-  group_by(council_tax_band) %>%
+labels <- joined_df3 |>
+  group_by(council_tax_band) |>
   summarise(n = n(), mean_price = mean(price_paid))
 
 transactions <-
-  joined_df3 %>%
-  count() %>%
+  joined_df3 |>
+  count() |>
   pull()
 
-joined_df3 %>%
+joined_df3 |>
   ggplot(aes(council_tax_band, price_paid)) +
   geom_violin(fill = cols[1]) +
   geom_label(aes(label = glue(
@@ -440,7 +439,7 @@ joined_df3 %>%
   ), y = 16),
   data = labels, size = 2.3, alpha = 0.7, fill = "white"
   ) +
-  scale_y_log10(labels = dollar_format(prefix = "£", 
+  scale_y_log10(labels = label_dollar(prefix = "£", 
                                        suffix = "m", accuracy = 0.1)) +
   labs(
     title = "Drippy Bandings",
@@ -462,33 +461,33 @@ Can we infer that the true population of band Es no longer exhibits any differen
 
 ```r
 bands_ef <- 
-  joined_df3 %>%
+  joined_df3 |>
   filter(council_tax_band %in% c("E", "D"))
 
 obs_stat <- 
-  bands_ef %>% 
-  specify(price_paid ~ council_tax_band) %>%
-  calculate(stat = "diff in means", order = c("E", "D")) %>%
+  bands_ef |> 
+  specify(price_paid ~ council_tax_band) |>
+  calculate(stat = "diff in means", order = c("E", "D")) |>
   pull()
 
 set.seed(2)
 
 boot_dist <-
-  bands_ef %>% 
-  specify(price_paid ~ council_tax_band) %>%
-  generate(reps = 2000, type = "bootstrap") %>%
+  bands_ef |> 
+  specify(price_paid ~ council_tax_band) |>
+  generate(reps = 2000, type = "bootstrap") |>
   calculate(stat = "diff in means", order = c("E", "D"))
 
 perc_ci <- get_ci(boot_dist)
 
-lower <- perc_ci %>%
-  pull(lower_ci) %>%
+lower <- perc_ci |>
+  pull(lower_ci) |>
   dollar(prefix = "£", suffix = "m", accuracy = 0.01)
-upper <- perc_ci %>%
-  pull(upper_ci) %>%
+upper <- perc_ci |>
+  pull(upper_ci) |>
   dollar(prefix = "£", suffix = "m", accuracy = 0.01)
 
-boot_dist %>%
+boot_dist |>
   visualise() +
   shade_confidence_interval(
     endpoints = perc_ci,
@@ -502,7 +501,7 @@ boot_dist %>%
       "{dollar(obs_stat, prefix = '£', suffix = 'm', accuracy = 0.01)}"
     )
   ) +
-  scale_x_continuous(labels = dollar_format(
+  scale_x_continuous(labels = label_dollar(
     prefix = "£",
     suffix = "m", accuracy = 0.1
   )) +
@@ -586,7 +585,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> scales </td>
-   <td style="text-align:left;"> dollar[6];  dollar_format[4];  percent_format[1] </td>
+   <td style="text-align:left;"> dollar[6];  label_dollar[4];  label_percent[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> SPARQL </td>

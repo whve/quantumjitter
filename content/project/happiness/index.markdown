@@ -11,7 +11,7 @@ tags:
   - geospatial
   - machine learning
 summary: The Smoke, to use London's nickname, has 32 boroughs plus the central business district known as the City of London. What does Cluster Analysis tell us about the characteristics that bind them?
-lastmod: '2022-04-10'
+lastmod: '2022-05-01'
 draft: false
 featured: false
 ---
@@ -22,9 +22,9 @@ featured: false
 
 
 
-[The Smoke](https://www.theguardian.com/environment/2002/nov/30/uknews.pollution), to use London's nickname, has 32 boroughs plus the central business district known as the [City of London](https://en.wikipedia.org/wiki/City_of_London). What does Cluster Analysis tell us about the characteristics that bind them?
-
 ![](/project/happiness/featured.GIF)
+
+[The Smoke](https://www.theguardian.com/environment/2002/nov/30/uknews.pollution), to use London's nickname, has 32 boroughs plus the central business district known as the [City of London](https://en.wikipedia.org/wiki/City_of_London). What does Cluster Analysis tell us about the characteristics that bind them?
 
 
 ```r
@@ -46,10 +46,10 @@ The graphics will use a custom palette created in [Adobe Colour](https://color.a
 ```r
 theme_set(theme_bw())
 
-cols <- c("#0AC449", "#CF4E0A", "#0057B7", "#FFD700", "#870AC4") %>%
+cols <- c("#0AC449", "#CF4E0A", "#0057B7", "#FFD700", "#870AC4") |>
   fct_inorder()
 
-tibble(x = 1:5, y = 1) %>%
+tibble(x = 1:5, y = 1) |>
   ggplot(aes(x, y, fill = cols)) +
   geom_col() +
   geom_label(aes(label = cols), size = 4, vjust = 2, fill = "white") +
@@ -73,9 +73,9 @@ tibble(x = 1:5, y = 1) %>%
 
 ```r
 raw_df <-
-  read_xlsx("london-borough-profiles.xlsx", sheet = 2) %>%
-  clean_names() %>%
-  filter(str_starts(code, "E")) %>%
+  read_xlsx("london-borough-profiles.xlsx", sheet = 2) |>
+  clean_names() |>
+  filter(str_starts(code, "E")) |>
   mutate(across(where(is.character), ~ na_if(., ".")),
     inner_outer_london = str_remove(inner_outer_london, " London")
   )
@@ -87,11 +87,12 @@ The City of London, aka "The Square Mile", is quite distinct from the other 32 a
 
 
 ```r
-raw_df %>%
-  mutate(na_count = rowSums(is.na(.))) %>%
-  select(area_name, na_count) %>%
-  filter(na_count != 0) %>%
-  arrange(desc(na_count)) %>%
+raw_df |> 
+  rowwise() |> 
+  mutate(na_count = sum(is.na(cur_data()))) |> 
+  select(area_name, na_count) |>
+  filter(na_count != 0) |>
+  arrange(desc(na_count)) |>
   kbl()
 ```
 
@@ -162,15 +163,15 @@ Not surprisingly, the two-dimensional visualisation sets the City of London apar
 
 
 ```r
-pca_fit <- raw_df %>%
-  select(where(is.numeric)) %>%
+pca_fit <- raw_df |>
+  select(where(is.numeric)) |>
   prcomp(scale = TRUE)
 
 pca_augmented <-
-  pca_fit %>%
+  pca_fit |>
   augment(raw_df)
 
-pca_augmented %>%
+pca_augmented |>
   ggplot(aes(.fittedPC1, .fittedPC2, fill = inner_outer_london)) +
   geom_label(aes(label = area_name), size = 2, hjust = "inward") +
   scale_fill_manual(values = as.character(cols)) +
@@ -187,19 +188,19 @@ After squeezing the many dimensions into two, how much of the original informati
 
 
 ```r
-pca_tidied <- pca_fit %>%
+pca_tidied <- pca_fit |>
   tidy(matrix = "eigenvalues")
 
 pct_explained <-
-  pca_tidied %>%
+  pca_tidied |>
   pluck("cumulative", 2)
 
-pca_tidied %>%
+pca_tidied |>
   ggplot(aes(PC, percent)) +
   geom_col(aes(fill = if_else(PC <= 2, TRUE, FALSE)),
     alpha = 0.8, show.legend = FALSE
   ) +
-  scale_y_continuous(labels = percent_format(1)) +
+  scale_y_continuous(labels = label_percent(1)) +
   scale_fill_manual(values = as.character(cols)) +
   coord_flip() +
   labs(
@@ -221,10 +222,10 @@ The axes depicted by the arrows below tell us that **anxiety scores** play a sig
 ```r
 pattern <- "_\\d{4}|_st.+|_score|_rates|proportion_of_|_\\d{2}_out_of_\\d{2}"
 
-pca_fit %>%
-  tidy(matrix = "rotation") %>%
-  pivot_wider(names_from = "PC", names_prefix = "PC", values_from = "value") %>%
-  mutate(column = str_remove_all(column, pattern)) %>%
+pca_fit |>
+  tidy(matrix = "rotation") |>
+  pivot_wider(names_from = "PC", names_prefix = "PC", values_from = "value") |>
+  mutate(column = str_remove_all(column, pattern)) |>
   ggplot(aes(PC1, PC2)) +
   geom_segment(
     xend = 0, yend = 0, colour = "grey70",
@@ -247,14 +248,14 @@ This may be validated by ranking all 33 areas by these three original variables.
 
 ```r
 pca_long <- 
-  pca_augmented %>%
-  select(area_name, matches("happ|anx|average_age")) %>%
-  rename_with(~ str_remove(., "_.*")) %>%
-  rename("avg_age" = "average") %>%
-  pivot_longer(-area, values_to = "score") %>%
+  pca_augmented |>
+  select(area_name, matches("happ|anx|average_age")) |>
+  rename_with(~ str_remove(., "_.*")) |>
+  rename("avg_age" = "average") |>
+  pivot_longer(-area, values_to = "score") |>
   mutate(area = reorder_within(area, score, name)) 
 
-pca_long %>%
+pca_long |>
   ggplot(aes(area, score, colour = name)) +
   geom_point(show.legend = FALSE) +
   facet_wrap(~name, scales = "free") +
@@ -273,9 +274,9 @@ To collect these areas into their natural groupings, a decision is needed on the
 set.seed(2022)
 
 kclusts <-
-  tibble(k = 1:6) %>%
+  tibble(k = 1:6) |>
   mutate(
-    kclust = map(k, ~ kmeans(pca_augmented %>% 
+    kclust = map(k, ~ kmeans(pca_augmented |> 
                                select(".fittedPC1", ".fittedPC2"), .x)),
     tidied = map(kclust, tidy),
     glanced = map(kclust, glance),
@@ -283,14 +284,14 @@ kclusts <-
   )
 
 assignments <-
-  kclusts %>%
+  kclusts |>
   unnest(cols = c(augmented))
 
 clusters <-
-  kclusts %>%
+  kclusts |>
   unnest(cols = c(tidied))
 
-assignments %>%
+assignments |>
   ggplot(aes(x = .fittedPC1, y = .fittedPC2)) +
   geom_point(aes(color = .cluster)) +
   facet_wrap(~k, nrow = 2) +
@@ -309,8 +310,8 @@ The [elbow method](https://en.wikipedia.org/wiki/Elbow_method_(clustering)) prov
 
 
 ```r
-kclusts %>%
-  unnest(cols = c(glanced)) %>%
+kclusts |>
+  unnest(cols = c(glanced)) |>
   ggplot(aes(k, tot.withinss)) +
   geom_line() +
   geom_point() +
@@ -335,8 +336,8 @@ And settling on this choice of 3 clusters, we get this split.
 
 
 ```r
-assignments %>%
-  filter(k == 3) %>%
+assignments |>
+  filter(k == 3) |>
   ggplot(aes(.fittedPC1, .fittedPC2, fill = .cluster)) +
   geom_label(aes(label = area_name), size = 2, hjust = "inward", overlap = FALSE) +
   scale_fill_manual(values = as.character(cols[c(1, 2, 4)])) +
@@ -357,19 +358,19 @@ shape_df <-
   st_read("statistical-gis-boundaries-london/ESRI",
     "London_Borough_Excluding_MHW",
     as_tibble = TRUE, quiet = TRUE
-  ) %>%
-  left_join(assignments %>% 
-              filter(k == 3), by = c("GSS_CODE" = "code")) %>%
-  select(.cluster, inner_outer_london, NAME, geometry) %>%
-  pivot_longer(c(.cluster, inner_outer_london)) %>%
+  ) |>
+  left_join(assignments |> 
+              filter(k == 3), by = c("GSS_CODE" = "code")) |>
+  select(.cluster, inner_outer_london, NAME, geometry) |>
+  pivot_longer(c(.cluster, inner_outer_london)) |>
   mutate(value = recode(value, "1" = "Cluster 1", 
                         "2" = "Cluster 2", "3" = "Cluster 3"))
 
-shape_df %>%
+shape_df |>
   mutate(name = recode(name,
     ".cluster" = "By Cluster",
     "inner_outer_london" = "By Inner/Outer"
-  )) %>%
+  )) |>
   ggplot() +
   geom_sf(aes(fill = value)) +
   geom_sf_label(aes(label = NAME), size = 2, alpha = 0.7) +
@@ -402,11 +403,11 @@ Summarising below the packages and functions used in this post enables me to sep
 <tbody>
   <tr>
    <td style="text-align:left;"> base </td>
-   <td style="text-align:left;"> as.character[7];  c[6];  conflicts[1];  cumsum[1];  function[1];  is.character[1];  is.na[1];  is.numeric[1];  rowSums[1];  search[1];  set.seed[4];  sum[1] </td>
+   <td style="text-align:left;"> as.character[7];  c[6];  conflicts[1];  cumsum[1];  function[1];  is.character[1];  is.na[1];  is.numeric[1];  search[1];  set.seed[4];  sum[2] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> dplyr </td>
-   <td style="text-align:left;"> filter[9];  across[1];  arrange[3];  desc[3];  group_by[1];  if_else[5];  left_join[1];  mutate[11];  na_if[1];  recode[2];  rename[1];  rename_with[1];  select[6];  summarise[1] </td>
+   <td style="text-align:left;"> filter[9];  across[1];  arrange[3];  cur_data[1];  desc[3];  group_by[1];  if_else[5];  left_join[1];  mutate[11];  na_if[1];  recode[2];  rename[1];  rename_with[1];  rowwise[1];  select[6];  summarise[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> forcats </td>
@@ -446,7 +447,7 @@ Summarising below the packages and functions used in this post enables me to sep
   </tr>
   <tr>
    <td style="text-align:left;"> scales </td>
-   <td style="text-align:left;"> percent[2];  percent_format[1] </td>
+   <td style="text-align:left;"> label_percent[1];  percent[2] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> sf </td>

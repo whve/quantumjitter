@@ -7,22 +7,19 @@ categories:
   - R
 tags:
   - web scraping
-summary: R packages & functions that make doing data science a joy. Established by aggregating actual usage across the [project portfolio](/project/) showcased in this blog.
-lastmod: '2022-04-10'
+summary: R packages & functions that make doing data science a joy. Established by aggregating actual usage across [quantumjitter projects](/project/).
+lastmod: '2022-05-01'
 draft: false
 featured: true
-image:
-  caption: Graphic by Carl Goodwin
-  focal_point: Center
 ---
 <script src="{{< blogdown/postref >}}index_files/kePrint/kePrint.js"></script>
 <link href="{{< blogdown/postref >}}index_files/lightable/lightable.css" rel="stylesheet" />
 
 
 
-Each [project](/project/) closes with a table summarising the R tools used. By visualising my most frequently used packages and functions I get a sense of where I may most benefit from going deeper and keeping abreast of the latest package versions
-
 ![](/project/box/featured-1.png)
+
+Each [project](/project/) closes with a table summarising the R tools used. By visualising my most frequently used packages and functions I get a sense of where I may most benefit from going deeper and keeping abreast of the latest package versions
 
 I may also spot superseded functions e.g. `spread` and `gather` may now be replaced by `pivot_wider` and `pivot_longer`. Or an opportunity to switch a non-tidyverse package for a newer tidyverse (or ecosystem) alternative, e.g. for UpSetR I can now use ggupset which plays well with ggplot.
 
@@ -45,7 +42,7 @@ library(patchwork)
 ```r
 theme_set(theme_bw())
 
-(cols <- wes_palette(name = "Royal1"))
+(cols <- wes_palette(name = "Royal2"))
 ```
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="100%" />
@@ -54,13 +51,15 @@ I'll start by listing the paths to the html files in the project directory.
 
 
 ```r
-files <- list.files(path = "../../../public/project/",
+file_list <- list.files(path = "../../../public/project/",
                     pattern = "\\.html$",
-                    recursive = TRUE) %>% 
-  str_c(getwd() %>% dirname(), ., sep = "/") %>%
-  str_replace("quantumjitter/content", "quantumjitter/public") %>% 
-  as_tibble() %>%
-  filter(!str_detect(value, "world|dt1|appfiles|project/index|page/")) %>%
+                    recursive = TRUE) 
+
+files <- file_list |> 
+  as_tibble() |> 
+  mutate(value = str_c(getwd() |> dirname(), file_list, sep = "/"),
+         value = str_replace(value, "/content", "/public")) |> 
+  filter(!str_detect(value, "world|dt1|appfiles|project/index|page/")) |>
   pull()
 ```
 
@@ -69,13 +68,13 @@ This enables me to extract the usage table for each project.
 
 ```r
 table_df <- map_dfr(files, function(x) {
-  x %>%
-    read_html() %>%
-    html_elements("#r-toolbox , table") %>%
+  x |>
+    read_html() |>
+    html_elements("#r-toolbox , table") |>
     html_table()
-}) %>%
-  clean_names(replace = c("io" = "")) %>%
-  select(package, functn) %>% 
+}) |>
+  clean_names(replace = c("io" = "")) |>
+  select(package, functn) |> 
   drop_na()
 ```
 
@@ -92,17 +91,17 @@ tidy <-
     tidyverse_packages(),
     fpp3_packages(),
     tidymodels_packages()
-  ) %>%
+  ) |>
   unique()
 
-tidy_df <- table_df %>%
-  separate_rows(functn, sep = ";") %>%
-  separate(functn, c("functn", "count"), "\\Q[\\E") %>%
+tidy_df <- table_df |>
+  separate_rows(functn, sep = ";") |>
+  separate(functn, c("functn", "count"), "\\Q[\\E") |>
   mutate(
-    count = str_remove(count, "]") %>% as.integer(),
+    count = str_remove(count, "]") |> as.integer(),
     functn = str_squish(functn)
-  ) %>%
-  count(package, functn, wt = count) %>%
+  ) |>
+  count(package, functn, wt = count) |>
   mutate(multiverse = case_when(
     package %in% tidy ~ "tidy",
     package %in% c("base", "graphics") ~ "base",
@@ -114,20 +113,20 @@ Then I can summarise usage and prepare for a faceted plot.
 
 
 ```r
-pack_df <- tidy_df %>%
-  count(package, multiverse, wt = n) %>%
+pack_df <- tidy_df |>
+  count(package, multiverse, wt = n) |>
   mutate(name = "package")
 
-fun_df <- tidy_df %>%
-  count(functn, multiverse, wt = n) %>%
+fun_df <- tidy_df |>
+  count(functn, multiverse, wt = n) |>
   mutate(name = "function")
 
-n_url <- files %>% n_distinct()
+n_url <- files |> n_distinct()
 
-packfun_df <- pack_df %>%
-  bind_rows(fun_df) %>%
-  group_by(name) %>%
-  arrange(desc(n)) %>%
+packfun_df <- pack_df |>
+  bind_rows(fun_df) |>
+  group_by(name) |>
+  arrange(desc(n)) |>
   mutate(
     packfun = coalesce(package, functn),
     name = fct_rev(name)
@@ -138,8 +137,8 @@ Clearly dplyr reigns supreme driven by `mutate` and `filter`.
 
 
 ```r
-p1 <- packfun_df %>%
-  filter(name == "package") %>% 
+p1 <- packfun_df |>
+  filter(name == "package") |> 
   ggplot(aes(fct_reorder(packfun, n), n, fill = multiverse)) +
   geom_col(show.legend = FALSE) +
   coord_flip() +
@@ -151,8 +150,8 @@ p1 <- packfun_df %>%
     x = NULL, y = NULL
   )
 
-p2 <- packfun_df %>%
-  filter(name == "function", n >= 4) %>% 
+p2 <- packfun_df |>
+  filter(name == "function", n >= 4) |> 
   ggplot(aes(fct_reorder(packfun, n), n, fill = multiverse)) +
   geom_col() +
   coord_flip() +
@@ -172,10 +171,10 @@ I'd also like a wordcloud. And thanks to blogdown, the updated visualisation is 
 ```r
 set.seed = 123
 
-packfun_df %>%
+packfun_df |>
   mutate(angle = 45 * sample(-2:2, n(), 
                              replace = TRUE, 
-                             prob = c(1, 1, 4, 1, 1))) %>%
+                             prob = c(1, 1, 4, 1, 1))) |>
   ggplot(aes(
     label = packfun,
     size = n,
@@ -187,9 +186,9 @@ packfun_df %>%
     seed = 789
   ) +
   scale_size_area(max_size = 20) +
-  scale_colour_manual(values = cols[c(4, 1, 2)]) +
+  scale_colour_manual(values = cols[c(2, 3, 4)]) +
   theme_void() +
-  theme(plot.background = element_rect(fill = cols[3]))
+  theme(plot.background = element_rect(fill = cols[5]))
 ```
 
 <img src="featured-1.png" width="100%" />
@@ -212,7 +211,7 @@ A little bit circular I know, but I might as well include this code too in my "f
   </tr>
   <tr>
    <td style="text-align:left;"> dplyr </td>
-   <td style="text-align:left;"> filter[8];  arrange[3];  bind_rows[1];  case_when[1];  coalesce[1];  count[4];  desc[3];  group_by[2];  if_else[3];  mutate[10];  n[8];  n_distinct[1];  pull[1];  select[1];  summarise[1] </td>
+   <td style="text-align:left;"> filter[8];  arrange[3];  bind_rows[1];  case_when[1];  coalesce[1];  count[4];  desc[3];  group_by[2];  if_else[3];  mutate[11];  n[8];  n_distinct[1];  pull[1];  select[1];  summarise[1] </td>
   </tr>
   <tr>
    <td style="text-align:left;"> forcats </td>
